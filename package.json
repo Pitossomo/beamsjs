@@ -4,6 +4,7 @@
   "description": "a lib for calculating bending moments and shear force in hyperstatic beams",
   "main": "index.js",
   "scripts": {
+    "start": "node dist/index.js",
     "watch": "tsc --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,7 +21,6 @@
   "author": "Pitossomo",
   "license": "ISC",
   "devDependencies": {
-    "lite-server": "^2.6.1",
     "typescript": "^4.7.4"
   }
 }

@@ -1,3 +1,6 @@
+import { Beam } from "./classes/Beam/Beam"
+import { Load } from "./classes/Load/Load"
+
 const loads = [
   new Load(1000, 0, 5)
 ]

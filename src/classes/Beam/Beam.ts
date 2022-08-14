@@ -1,35 +1,9 @@
-interface iLoad {
-  value: number
-  x0: number,
-  xf: number
-}
+import { iBeam } from "../../types/iBeam"
+import { Load } from "../Load/Load"
 
-class Load implements iLoad {
-  value: number
-  x0: number
-  xf: number
-  
-  constructor(value: number, x0: number, xf: number) {
-    this.value = value,
-    this.x0 = x0,
-    this.xf = xf
-  }
-}
-
-
-interface iBeam {
-  length: number,
-  loads: iLoad[],
-  supports: number[]
-  reactions: number[],
-  shearForce: (x: number) => number,
-  bendingMoment: (x: number) => number
-}
-
-
-class Beam implements iBeam {
+export class Beam implements iBeam {
   length: number
-  loads: iLoad[]
+  loads: Load[]
   supports: number[]
   reactions: number[]
   shearForce: (x: number) => number
@@ -48,7 +22,7 @@ class Beam implements iBeam {
     this.reactions = supports.map(e => sumLoads/supports.length)
     this.shearForce = x => loads.reduce(
       (accum, load) => {
-        const loadLength = Math.min(x,load.xf)
+        const loadLength = Math.min(x,load.xf) - load.x0
         return accum + ((x < load.x0) ? (loadLength-load.x0)*load.value : 0)
       } , 0
     ) + this.reactions.reduce(

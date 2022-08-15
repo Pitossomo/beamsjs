@@ -1,5 +1,4 @@
-import { Beam } from "../classes/Beam/Beam"
-import { Load } from "../classes/Load/Load"
+import { Beam } from "../classes/Beam"
 
 describe('Beam class', () => {
   const load = 17

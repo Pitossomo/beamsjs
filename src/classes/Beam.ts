@@ -1,4 +1,4 @@
-import { iBeam, Node, Result } from "../types/types"
+import { iBeam, Node } from "../types/types"
 import { Edge } from "./Edges";
 
 export class Beam implements iBeam {
@@ -8,6 +8,7 @@ export class Beam implements iBeam {
   displacements: any[];
   stiffness: any;
   forces: any[];
+  moments: any[];
 
   constructor(
     nodes: Node[],
@@ -22,7 +23,41 @@ export class Beam implements iBeam {
 
     this.displacements = new Array(nodes.length).fill(0)
     this.stiffness = new Array(nodes.length).fill(new Array(nodes.length).fill(0))
+    this.moments = new Array(nodes.length).fill(0)
     this.forces = new Array(nodes.length).fill(0)
+
+    // Stiffness, main forces and main moments computed
+    this.edges.forEach(({load, length, startNode, endNode, ei}, i) => {
+      if (startNode.yFixed && endNode.yFixed) {
+        const vIncrement = load*length/2
+        const mIncrement = load*(length**2)/12 
+        this.moments[i] += mIncrement
+        this.moments[i+1] += mIncrement
+        this.forces[i] += vIncrement
+        this.forces[i+1] += vIncrement
+
+        this.stiffness[i][i] += 4*ei/(length**2)
+        this.stiffness[i+1][i] += 2*ei/(length**2)
+        // this.vStiffness[i][i] += 6*ei/length
+        // this.vStiffness[i+1][i] += -6*ei/length
+
+        this.stiffness[i][i+1] += 2*ei/(length**2)
+        this.stiffness[i+1][i+1] += 4*ei/(length**2)
+        // this.vStiffness[i][i+1] += 6*ei/length
+        // this.vStiffness[i+1][i+1] += -6*ei/length
+
+      } else if (startNode.yFixed && !endNode.yFixed) {
+        this.moments[i] += load*(length**2)/2
+        this.forces[i] += load*length
+      } else if (!startNode.yFixed && endNode.yFixed) {
+        this.moments[i+1] += load*(length**2)/2
+        this.forces[i+1] += load*length
+      }
+    })
+
+    // Solve for displacement matrix
+    // TODO
+    // this.displacements = ...
 
   }
 /*

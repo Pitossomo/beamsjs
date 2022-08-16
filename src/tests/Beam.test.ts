@@ -1,10 +1,21 @@
 import { Beam } from "../classes/Beam"
+import { Node } from "../classes/Nodes"
 
 describe('Beam class', () => {
   const load = 17
   const length = 3.5
-  const loads = [new Load(load, 0, length)] 
-  const beam = new Beam(length, loads, [0,length])
+  const nodes = [new Node(0), new Node(length)]
+  const beam = new Beam(nodes, load)
+
+  it('has correct length property', () => {
+    expect(beam.length).toBe(3.5)
+    expect(beam.nodes[beam.nodes.length-1].x).toBe(3.5)
+  })
+
+  /*
+  it('build stiffness matrix correctly', () => {
+    
+  })
 
   it('calculate accurate reactions for isostatic beams with 2 supports and no balance', () => {
     expect(beam.reactions[0]).toBeCloseTo(29.75)
@@ -24,4 +35,5 @@ describe('Beam class', () => {
     expect(beam.bendingMoment(1.75)).toBeCloseTo(26.03125)
     expect(beam.bendingMoment(3.5)).toBeCloseTo(0)
   })
+  */
 })

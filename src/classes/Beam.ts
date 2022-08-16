@@ -1,25 +1,29 @@
-import { iBeam, Node } from "../types/types"
+import { iBeam } from "../@types/types"
 import { Edge } from "./Edges";
+import { Node } from "./Nodes";
 
 export class Beam implements iBeam {
-  nodes: Node[]
-  edges: Edge[]
+  nodes: Node[];
+  edges: Edge[];
 
   displacements: any[];
   stiffness: any;
   forces: any[];
   moments: any[];
+  length: number;
 
   constructor(
     nodes: Node[],
     load: number,
-    EI: number = 1
+    EI: number = 1,
   ) {
     this.nodes = nodes
     this.edges = []
     for (let i = 0; i<nodes.length-1; i++) {
       this.edges.push(new Edge(nodes[i], nodes[i+1], load, EI))
-    }      
+    }
+    
+    this.length = nodes[nodes.length-1].x
 
     this.displacements = new Array(nodes.length).fill(0)
     this.stiffness = new Array(nodes.length).fill(new Array(nodes.length).fill(0))
@@ -27,7 +31,7 @@ export class Beam implements iBeam {
     this.forces = new Array(nodes.length).fill(0)
 
     // Stiffness, main forces and main moments computed
-    this.edges.forEach(({load, length, startNode, endNode, ei}, i) => {
+    this.edges.forEach(({load, length, startNode, endNode, EI}, i) => {
       if (startNode.yFixed && endNode.yFixed) {
         const vIncrement = load*length/2
         const mIncrement = load*(length**2)/12 
@@ -36,13 +40,13 @@ export class Beam implements iBeam {
         this.forces[i] += vIncrement
         this.forces[i+1] += vIncrement
 
-        this.stiffness[i][i] += 4*ei/(length**2)
-        this.stiffness[i+1][i] += 2*ei/(length**2)
+        this.stiffness[i][i] += 4*EI/(length**2)
+        this.stiffness[i+1][i] += 2*EI/(length**2)
         // this.vStiffness[i][i] += 6*ei/length
         // this.vStiffness[i+1][i] += -6*ei/length
 
-        this.stiffness[i][i+1] += 2*ei/(length**2)
-        this.stiffness[i+1][i+1] += 4*ei/(length**2)
+        this.stiffness[i][i+1] += 2*EI/(length**2)
+        this.stiffness[i+1][i+1] += 4*EI/(length**2)
         // this.vStiffness[i][i+1] += 6*ei/length
         // this.vStiffness[i+1][i+1] += -6*ei/length
 

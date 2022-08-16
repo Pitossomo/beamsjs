@@ -4,7 +4,7 @@ export type Reaction = {
   // M: number
 }
 
-export type Node = {
+export interface iNode {
   x: number,
   // y: number,
   // xFixed: boolean,
@@ -13,8 +13,8 @@ export type Node = {
 }
 
 export interface iEdge {
-  startNode: Node,
-  endNode: Node,
+  startNode: iNode,
+  endNode: iNode,
   load: number
   EI: number;
   length: number,
@@ -30,7 +30,7 @@ export type Result = {
 }
 
 export interface iBeam {
-  nodes: Node[],
+  nodes: iNode[],
   edges: iEdge[],
   result?: Result
 }

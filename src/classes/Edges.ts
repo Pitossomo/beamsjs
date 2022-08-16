@@ -1,4 +1,5 @@
-import { iEdge, Node } from "../types/types";
+import { iEdge } from "../@types/types";
+import { Node } from "./Nodes";
 
 export class Edge implements iEdge {
   startNode: Node;

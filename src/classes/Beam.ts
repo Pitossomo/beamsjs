@@ -1,16 +1,21 @@
 import { iBeam } from "../@types/types"
 import { Edge } from "./Edges";
 import { Node } from "./Nodes";
+import { create, all, lusolve} from "mathjs";
+import { zeros } from "../utils";
+
+const config: any  = {
+  matrix: 'Array'
+}
+const math = create(all, config)
 
 export class Beam implements iBeam {
   nodes: Node[];
   edges: Edge[];
-
-  displacements: any[];
-  stiffness: any;
-  forces: any[];
-  moments: any[];
   length: number;
+  displacements: any;
+  stiffness: any;
+  moments: any[];
 
   constructor(
     nodes: Node[],
@@ -25,44 +30,56 @@ export class Beam implements iBeam {
     
     this.length = nodes[nodes.length-1].x
 
-    this.displacements = new Array(nodes.length).fill(0)
-    this.stiffness = new Array(nodes.length).fill(new Array(nodes.length).fill(0))
-    this.moments = new Array(nodes.length).fill(0)
-    this.forces = new Array(nodes.length).fill(0)
-
+    let stiffness = zeros([nodes.length, nodes.length])
+    let moments = new Array(nodes.length).fill(0)
+    let forces = new Array(nodes.length).fill(0)
+    
     // Stiffness, main forces and main moments computed
     this.edges.forEach(({load, length, startNode, endNode, EI}, i) => {
       if (startNode.yFixed && endNode.yFixed) {
-        const vIncrement = load*length/2
-        const mIncrement = load*(length**2)/12 
-        this.moments[i] += mIncrement
-        this.moments[i+1] += mIncrement
-        this.forces[i] += vIncrement
-        this.forces[i+1] += vIncrement
+        if (i===0) {
+          moments[i+1] += -load*(length**2)/8
+          forces[i] += 3*load*length/8
+          forces[i+1] += 5*load*length/8
 
-        this.stiffness[i][i] += 4*EI/(length**2)
-        this.stiffness[i+1][i] += 2*EI/(length**2)
-        // this.vStiffness[i][i] += 6*ei/length
-        // this.vStiffness[i+1][i] += -6*ei/length
+          stiffness[i+1][i+1] = stiffness[i+1][i+1] + 3*EI/length
+        } else if (i===this.edges.length-1) {
+          moments[i] += load*(length**2)/8
+          forces[i] += 5*load*length/8
+          forces[i+1] += 3*load*length/8
 
-        this.stiffness[i][i+1] += 2*EI/(length**2)
-        this.stiffness[i+1][i+1] += 4*EI/(length**2)
-        // this.vStiffness[i][i+1] += 6*ei/length
-        // this.vStiffness[i+1][i+1] += -6*ei/length
+          stiffness[i][i] += 3*EI/length
 
+        } else {
+          const vIncrement = load*length/2
+          const mIncrement = load*(length**2)/12 
+          moments[i] += mIncrement
+          moments[i+1] += mIncrement
+          forces[i] += vIncrement
+          forces[i+1] += vIncrement
+  
+          stiffness[i][i] += 4*EI/(length**2)
+          stiffness[i+1][i] += 2*EI/(length**2)
+          // this.vStiffness[i][i] += 6*ei/length
+          // this.vStiffness[i+1][i] += -6*ei/length
+  
+          stiffness[i][i+1] += 2*EI/(length**2)
+          stiffness[i+1][i+1] += 4*EI/(length**2)
+          // this.vStiffness[i][i+1] += 6*ei/length
+          // this.vStiffness[i+1][i+1] += -6*ei/length
+        }
       } else if (startNode.yFixed && !endNode.yFixed) {
-        this.moments[i] += load*(length**2)/2
-        this.forces[i] += load*length
+        moments[i] += load*(length**2)/2
+        forces[i] += load*length
       } else if (!startNode.yFixed && endNode.yFixed) {
-        this.moments[i+1] += load*(length**2)/2
-        this.forces[i+1] += load*length
+        moments[i+1] += load*(length**2)/2
+        forces[i+1] += load*length
       }
     })
 
-    // Solve for displacement matrix
-    // TODO
-    // this.displacements = ...
-
+    this.moments = moments;
+    this.stiffness = stiffness;
+    this.displacements = math.lusolve(stiffness, moments);
   }
 /*
 const sumLoads = loads.reduce((sum, load) => sum + load.value*(load.xf - load.x0), 0)

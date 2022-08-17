@@ -21,9 +21,16 @@ describe('Beam class', () => {
   })
 
   it('build moments matrix correctly', () => {
-    const expectedStiffness = [0,19.2,0]
-    expectedStiffness.forEach((val, i) => {
+    const expectedMoments = [0,19.2,0]
+    expectedMoments.forEach((val, i) => {
       expect(beam.moments[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('solve for correct displacements correctly', () => {
+    const expectedDisplacements = [0,-12.288,0]
+    expectedDisplacements.forEach((val, i) => {
+      expect(beam.displacements[i]).toBeCloseTo(val)
     })
   })
 

@@ -16,6 +16,8 @@ export class Beam implements iBeam {
   displacements: any;
   stiffness: any;
   moments: any[];
+  forces: any[];
+  reactions: any;
 
   constructor(
     nodes: Node[],
@@ -83,8 +85,10 @@ export class Beam implements iBeam {
     })
 
     this.moments = moments;
+    this.forces = forces;
     this.stiffness = stiffness;
     this.displacements = math.lusolve(stiffness, moments).map(e => -e[0]);
+    this.reactions = math.add(math.multiply(vStiffness,this.displacements), forces)
   }
 /*
 const sumLoads = loads.reduce((sum, load) => sum + load.value*(load.xf - load.x0), 0)

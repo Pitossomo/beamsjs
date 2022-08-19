@@ -27,10 +27,24 @@ describe('Beam class', () => {
     })
   })
 
+  it('build forces matrix correctly', () => {
+    const forces = [14.4,60.0,21.6]
+    forces.forEach((val, i) => {
+      expect(beam.forces[i]).toBeCloseTo(val)
+    })
+  })
+
   it('solve for correct displacements correctly', () => {
     const expectedDisplacements = [0,-12.288,0]
     expectedDisplacements.forEach((val, i) => {
       expect(beam.displacements[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('solve reactions correctly', () => {
+    const expectedReactions = [10.8,62.0,23.2]
+    expectedReactions.forEach((val, i) => {
+      expect(beam.reactions[i]).toBeCloseTo(val)
     })
   })
 

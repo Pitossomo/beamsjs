@@ -5,7 +5,8 @@ import { create, all, lusolve} from "mathjs";
 import { zeros } from "../utils";
 
 const config: any  = {
-  matrix: 'Array'
+  matrix: 'Array',
+  number: 'number'
 }
 const math = create(all, config)
 
@@ -13,11 +14,14 @@ export class Beam implements iBeam {
   nodes: Node[];
   edges: Edge[];
   length: number;
+
+  stiffness: number[][];
+  moments: number[];
+  forces: number[];
   displacements: any;
-  stiffness: any;
-  moments: any[];
-  forces: any[];
   reactions: any;
+  shearForce: (x: number) => number;
+  bendingMoment: (x: number) => number;
 
   constructor(
     nodes: Node[],
@@ -89,27 +93,27 @@ export class Beam implements iBeam {
     this.stiffness = stiffness;
     this.displacements = math.lusolve(stiffness, moments).map(e => -e[0]);
     this.reactions = math.add(math.multiply(vStiffness,this.displacements), forces)
+ 
+    this.shearForce = x => this.edges.reduce(
+      (accum, edge, i) => {
+        if (x < edge.startNode.x) return accum;
+        
+        const loadLength = Math.min(x,edge.endNode.x) - edge.startNode.x
+        return accum + this.reactions[i] - loadLength*edge.load
+      }, 0
+    )
+ 
+    this.bendingMoment = x => this.edges.reduce(
+      (accum, edge, i) => {
+        if (x < edge.startNode.x) return accum;
+
+        const loadLength = Math.min(x,edge.endNode.x) - edge.startNode.x;
+        return (
+          accum 
+          - loadLength*edge.load*(x-edge.startNode.x-loadLength/2)
+          + this.reactions[i]*(x-edge.startNode.x)
+        )
+      } , 0
+    )
   }
-/*
-const sumLoads = loads.reduce((sum, load) => sum + load.value*(load.xf - load.x0), 0)
-this.reactions = supports.map(e => sumLoads/supports.length)
-this.shearForce = x => loads.reduce(
-  (accum, load) => {
-    const loadLength = Math.min(x,load.xf) - load.x0
-    return accum + ((x < load.x0) ? (loadLength-load.x0)*load.value : 0)
-  } , 0
-) + this.reactions.reduce(
-  (accum, reaction, index) => accum + ((supports[index] < x) ? reaction : 0)
-  , 0
-)
-this.bendingMoment = x => loads.reduce(
-  (accum, load) => {
-    const loadLength = Math.min(x,load.xf)
-    return accum + ((x < load.x0) ? Math.pow(loadLength,2)*load.value/2: 0)
-  } , 0
-) + this.reactions.reduce(
-  (accum, reaction, index) => accum + Math.max(0, (x - supports[index])*reaction)
-  , 0
-)
-*/
 }

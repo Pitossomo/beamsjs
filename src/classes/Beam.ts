@@ -65,7 +65,7 @@ export class Beam implements iBeam {
           const vIncrement = load*length/2;
           const mIncrement = load*(length**2)/12 ;
           moments[i] += mIncrement;
-          moments[i+1] += mIncrement;
+          moments[i+1] += -mIncrement;
           forces[i] += vIncrement;
           forces[i+1] += vIncrement;
   

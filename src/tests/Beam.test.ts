@@ -66,3 +66,102 @@ describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstat
     expect(beam.bendingMoment(8)).toBeCloseTo(0)
   })
 })
+
+describe('Beam object with 3 gaps, 4 rotation-free y-fixed supports, hyperstatic, with no cantilever ends', () => {
+  const load = 12
+  const nodes = Node.createFixNodes([0, 4.8, 10.2, 14.4])
+  const beam = new Beam(nodes, load)
+
+  it('has correct length property', () => {
+    expect(beam.length).toBe(14.4)
+    expect(beam.nodes[beam.nodes.length-1].x).toBe(14.4)
+  })
+
+  it('has correct stiffness matrix', () => {
+    const expectedStiffness = [
+      [0,0,0,0],
+      [0,1.36574,0.37037,0],
+      [0,0.37037,1.45503,0],
+      [0,0,0,0]
+    ]
+    expectedStiffness.forEach((row, i) => {
+      row.forEach((val, j) => {
+        expect(beam.stiffness[i][j]).toBeCloseTo(val)        
+      })
+    })
+  })
+
+  it('has correct main moments matrix', () => {
+    const expectedMoments = [0,-5.4,-2.7,0]
+    expectedMoments.forEach((val, i) => {
+      expect(beam.moments[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('has correct main forces matrix', () => {
+    const forces = [21.6,68.4,63.9,18.9]
+    forces.forEach((val, i) => {
+      expect(beam.forces[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('solves for correct displacements', () => {
+    const expectedDisplacements = [0,3.7065,0.9122,0]
+    expectedDisplacements.forEach((val, i) => {
+      expect(beam.displacements[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('solves for correct reactions', () => {
+    const expectedReactions = [22.0826,68.8677,63.1048,18.7449]
+    expectedReactions.forEach((val, i) => {
+      expect(beam.reactions[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('calculates shear forces correctly', () => {
+    const dx = 0.0001
+    expect(beam.shearForce(dx)).toBeCloseTo(22.0826)
+    expect(beam.shearForce(4.8-dx)).toBeCloseTo(-35.5162)
+    expect(beam.shearForce(4.8+dx)).toBeCloseTo(33.3491)
+    expect(beam.shearForce(10.2-dx)).toBeCloseTo(-31.4485)
+    expect(beam.shearForce(10.2+dx)).toBeCloseTo(31.6539)
+    expect(beam.shearForce(14.4-dx)).toBeCloseTo(-18.7449)
+  })
+
+  it('calculates bending moments correctly', () => {
+    expect(beam.bendingMoment(0)).toBeCloseTo(0)
+    expect(beam.bendingMoment(1.84)).toBeCloseTo(20.32)
+    expect(beam.bendingMoment(4.8)).toBeCloseTo(-32.24)
+    expect(beam.bendingMoment(7.58)).toBeCloseTo(14.10)
+    expect(beam.bendingMoment(10.2)).toBeCloseTo(-27.11)
+    expect(beam.bendingMoment(12.84)).toBeCloseTo(14.64)
+    expect(beam.bendingMoment(14.4)).toBeCloseTo(0)
+  })
+})
+
+describe('Isostatic beam with single gap', () => {
+  const load = 17
+  const nodes = Node.createFixNodes([0, 7])
+  const beam = new Beam(nodes, load)
+  const yReaction = 17*7/2
+
+  it('solves for correct reactions', () => {
+    const expectedReactions = [yReaction, yReaction]
+    expectedReactions.forEach((val, i) => {
+      expect(beam.reactions[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('calculates shear forces correctly', () => {
+    const dx = 0.0001
+    expect(beam.shearForce(dx)).toBeCloseTo(yReaction)
+    expect(beam.shearForce(7-dx)).toBeCloseTo(-yReaction)
+  })
+
+  it('calculates bending moments correctly', () => {
+    expect(beam.bendingMoment(0)).toBeCloseTo(0)
+    expect(beam.bendingMoment(3.5)).toBeCloseTo(104.125)
+    expect(beam.bendingMoment(7)).toBeCloseTo(0)
+  })
+})

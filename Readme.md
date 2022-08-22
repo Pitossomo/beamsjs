@@ -7,13 +7,20 @@
   - Run `npm test`
 
 ## Version history
-### V.0.1.1
+### Version 0.1.x
+
+#### 0.1.2
+- Aug 22th, 2022
+- Beam with cantilever on both tested and working
+- **TODO:** Add test and calculations for punctual loads
+
+#### 0.1.1
 - Aug 20th, 2022
 - Included tests for a isostatic beam and a longer, 3-gaps hyperstatic beam 
 - Fixed a wrong sign on the main moments matrix calculation
-- **TODO:** test for beams with cantilever ends 
+- **TODO:** Test for beams with cantilever ends 
 
-### V.0.1.0
+#### 0.1.0
 - Aug 19th, 2022
 - Structural model for calculating reactions, shear forces and bending moments in rotation-free beams
 - Tested for hyperstatic beams only

@@ -45,7 +45,7 @@ export class Beam implements iBeam {
     this.edges.forEach(({load, length, startNode, endNode, EI}, i) => {
       if (startNode.yFixed && endNode.yFixed) {
         if (i===0) {
-          moments[i+1] += -load*(length**2)/8;
+          moments[i+1] -= load*(length**2)/8;
           forces[i] += 3*load*length/8;
           forces[i+1] += 5*load*length/8;
 
@@ -83,7 +83,7 @@ export class Beam implements iBeam {
         moments[i] += load*(length**2)/2;
         forces[i] += load*length;
       } else if (!startNode.yFixed && endNode.yFixed) {
-        moments[i+1] += load*(length**2)/2;
+        moments[i+1] += -load*(length**2)/2;
         forces[i+1] += load*length;
       }
     })

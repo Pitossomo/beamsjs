@@ -178,28 +178,28 @@ describe('Hyperstatic beam with 3 supports and 2 cantilever ends', () => {
   const beam = new Beam(nodes, load)
 
   it('solves for correct reactions', () => {
-    const expectedReactions = [87, -41.4, 73.3]
+    const expectedReactions = [0,87.13, -41.44, 73.31,0]
     expectedReactions.forEach((val, i) => {
       expect(beam.reactions[i]).toBeCloseTo(val)
     })
   })
 
   it('calculates shear forces correctly', () => {
-    const dx = 0.0001
+    const dx = 0.00000001
     expect(beam.shearForce(dx)).toBeCloseTo(0)
-    expect(beam.shearForce(2-dx)).toBeCloseTo(-34)
-    expect(beam.shearForce(2+dx)).toBeCloseTo(53.1)
-    expect(beam.shearForce(3-dx)).toBeCloseTo(36.1)
-    expect(beam.shearForce(3+dx)).toBeCloseTo(-5.3)
-    expect(beam.shearForce(5-dx)).toBeCloseTo(-39.3)
-    expect(beam.shearForce(5+dx)).toBeCloseTo(34.0)
+    expect(beam.shearForce(2-dx)).toBeCloseTo(-34.00)
+    expect(beam.shearForce(2+dx)).toBeCloseTo(53.12)
+    expect(beam.shearForce(3-dx)).toBeCloseTo(36.13)
+    expect(beam.shearForce(3+dx)).toBeCloseTo(-5.31)
+    expect(beam.shearForce(5-dx)).toBeCloseTo(-39.31)
+    expect(beam.shearForce(5+dx)).toBeCloseTo(34.00)
     expect(beam.shearForce(7-dx)).toBeCloseTo(0)  
   })
 
   it('calculates bending moments correctly', () => {
     expect(beam.bendingMoment(0)).toBeCloseTo(0)
     expect(beam.bendingMoment(2)).toBeCloseTo(-34)
-    expect(beam.bendingMoment(3)).toBeCloseTo(10.6)
+    expect(beam.bendingMoment(3)).toBeCloseTo(10.625)
     expect(beam.bendingMoment(5)).toBeCloseTo(-34)
     expect(beam.bendingMoment(7)).toBeCloseTo(0)
   })

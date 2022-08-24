@@ -6,8 +6,16 @@
   - Run `npm install` inside the newly created directory to install the node modules 
   - Run `npm test`
 
+## Current Tests Status
+![TestStatus](./src/tests/img/testStatus.png)
+
 ## Version history
 ### Version 0.1.x
+
+#### 0.1.3
+- Aug 24th, 2022
+- Isostatic beam with punctual load tested and passing 
+- **TODO:** Add distributed trapezoidal loads
 
 #### 0.1.2
 - Aug 22th, 2022

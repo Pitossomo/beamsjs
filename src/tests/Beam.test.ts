@@ -1,4 +1,3 @@
-import { iPunctualLoad } from "../@types/types"
 import { Beam } from "../classes/Beam"
 import { PunctualLoad } from "../classes/PunctualLoad"
 import { Node } from "../classes/Nodes"

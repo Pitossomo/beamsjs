@@ -95,9 +95,14 @@ export class Beam implements iBeam {
     this.shearForce = x => this.edges.reduce(
       (accum, edge, i) => {
         if (x < edge.startNode.x) return accum;
-        
-        const loadLength = Math.min(x,edge.endNode.x) - edge.startNode.x
-        return accum + this.reactions[i] - loadLength*edge.load
+        const distLoadLength = Math.min(x,edge.endNode.x) - edge.startNode.x
+
+        return (
+          accum 
+          + this.reactions[i] 
+          - distLoadLength*edge.load
+          - punctualLoads.reduce<number>((accum2, p) => accum2 + ((p.x <= x) ? p.value : 0), 0)
+        ) 
       }, 0
     )
  
@@ -108,10 +113,11 @@ export class Beam implements iBeam {
         const loadLength = Math.min(x,edge.endNode.x) - edge.startNode.x;
         return (
           accum 
-          - loadLength*edge.load*(x-edge.startNode.x-loadLength/2)
           + this.reactions[i]*(x-edge.startNode.x)
+          - loadLength*edge.load*(x-edge.startNode.x-loadLength/2)
+          - punctualLoads.reduce<number>((accum2, p) => accum2 + ((p.x <= x) ? p.value*(x-p.x) : 0), 0)
         )
-      } , 0
+      }, 0
     )
   }
 }

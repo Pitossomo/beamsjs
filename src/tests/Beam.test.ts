@@ -1,5 +1,6 @@
 import { iPunctualLoad } from "../@types/types"
 import { Beam } from "../classes/Beam"
+import { PunctualLoad } from "../classes/PunctualLoad"
 import { Node } from "../classes/Nodes"
 
 describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstatic, with no cantilever ends', () => {
@@ -10,36 +11,6 @@ describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstat
   it('has correct length property', () => {
     expect(beam.length).toBe(8)
     expect(beam.nodes[beam.nodes.length-1].x).toBe(8)
-  })
-
-  it('has correct stiffness matrix', () => {
-    const expectedStiffness = [[0,0,0],[0,1.5625,0],[0,0,0]]
-    expectedStiffness.forEach((row, i) => {
-      row.forEach((val, j) => {
-        expect(beam.stiffness[i][j]).toBeCloseTo(val)        
-      })
-    })
-  })
-
-  it('has correct main moments matrix', () => {
-    const expectedMoments = [0,19.2,0]
-    expectedMoments.forEach((val, i) => {
-      expect(beam.moments[i]).toBeCloseTo(val)
-    })
-  })
-
-  it('has correct main forces matrix', () => {
-    const forces = [14.4,60.0,21.6]
-    forces.forEach((val, i) => {
-      expect(beam.forces[i]).toBeCloseTo(val)
-    })
-  })
-
-  it('solves for correct displacements', () => {
-    const expectedDisplacements = [0,-12.288,0]
-    expectedDisplacements.forEach((val, i) => {
-      expect(beam.displacements[i]).toBeCloseTo(val)
-    })
   })
 
   it('solves for correct reactions', () => {
@@ -76,41 +47,6 @@ describe('Beam object with 3 gaps, 4 rotation-free y-fixed supports, hyperstatic
   it('has correct length property', () => {
     expect(beam.length).toBe(14.4)
     expect(beam.nodes[beam.nodes.length-1].x).toBe(14.4)
-  })
-
-  it('has correct stiffness matrix', () => {
-    const expectedStiffness = [
-      [0,0,0,0],
-      [0,1.36574,0.37037,0],
-      [0,0.37037,1.45503,0],
-      [0,0,0,0]
-    ]
-    expectedStiffness.forEach((row, i) => {
-      row.forEach((val, j) => {
-        expect(beam.stiffness[i][j]).toBeCloseTo(val)        
-      })
-    })
-  })
-
-  it('has correct main moments matrix', () => {
-    const expectedMoments = [0,-5.4,-2.7,0]
-    expectedMoments.forEach((val, i) => {
-      expect(beam.moments[i]).toBeCloseTo(val)
-    })
-  })
-
-  it('has correct main forces matrix', () => {
-    const forces = [21.6,68.4,63.9,18.9]
-    forces.forEach((val, i) => {
-      expect(beam.forces[i]).toBeCloseTo(val)
-    })
-  })
-
-  it('solves for correct displacements', () => {
-    const expectedDisplacements = [0,3.7065,0.9122,0]
-    expectedDisplacements.forEach((val, i) => {
-      expect(beam.displacements[i]).toBeCloseTo(val)
-    })
   })
 
   it('solves for correct reactions', () => {
@@ -207,10 +143,7 @@ describe('Hyperstatic beam with 3 supports and 2 cantilever ends', () => {
 })
 
 describe('Isostatic beam with 7m in length and a punctual load of 5 in x=3m', () => {
-  const punctualLoad: iPunctualLoad = {
-    value: 5,
-    x: 3
-  }
+  const punctualLoad = new PunctualLoad(5, 3)
 
   const nodes = Node.createFixNodes([0,7])
   const beam = new Beam(nodes, 0, [punctualLoad])

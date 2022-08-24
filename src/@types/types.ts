@@ -20,6 +20,13 @@ export interface iEdge {
   length: number,
 }
 
+export interface iDistributedLoad {
+  startValue: number,
+  endValue: number,
+  x0: number,
+  xf: number
+}
+
 export interface iPunctualLoad {
   value: number,
   x: number

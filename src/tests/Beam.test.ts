@@ -1,3 +1,4 @@
+import { iPunctualLoad } from "../@types/types"
 import { Beam } from "../classes/Beam"
 import { Node } from "../classes/Nodes"
 
@@ -201,6 +202,37 @@ describe('Hyperstatic beam with 3 supports and 2 cantilever ends', () => {
     expect(beam.bendingMoment(2)).toBeCloseTo(-34)
     expect(beam.bendingMoment(3)).toBeCloseTo(10.625)
     expect(beam.bendingMoment(5)).toBeCloseTo(-34)
+    expect(beam.bendingMoment(7)).toBeCloseTo(0)
+  })
+})
+
+describe('Isostatic beam with 7m in length and a punctual load of 5 in x=3m', () => {
+  const punctualLoad: iPunctualLoad = {
+    value: 5,
+    x: 3
+  }
+
+  const nodes = Node.createFixNodes([0,7])
+  const beam = new Beam(nodes, 0, [punctualLoad])
+
+  it('solves for correct reactions', () => {
+    const expectedReactions = [2.857, 2.143]
+    expectedReactions.forEach((val, i) => {
+      expect(beam.reactions[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('calculates shear forces correctly', () => {
+    const dx = 0.00000001
+    expect(beam.shearForce(dx)).toBeCloseTo(2.857)
+    expect(beam.shearForce(2)).toBeCloseTo(2.857)
+    expect(beam.shearForce(5)).toBeCloseTo(-2.143)
+    expect(beam.shearForce(7-dx)).toBeCloseTo(-2.143)
+  })
+
+  it('calculates bending moments correctly', () => {
+    expect(beam.bendingMoment(0)).toBeCloseTo(0)
+    expect(beam.bendingMoment(3)).toBeCloseTo(8.57)
     expect(beam.bendingMoment(7)).toBeCloseTo(0)
   })
 })

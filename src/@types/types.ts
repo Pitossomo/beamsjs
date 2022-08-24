@@ -20,18 +20,13 @@ export interface iEdge {
   length: number,
 }
 
-export type Result = {
-  stiffness: number[][],
-  forces: number[]
-  displacements: number[],
-  reactions: number[] 
-  shearForce: (x: number) => number,
-  bendingMoment: (x: number) => number
-}
+export interface iPunctualLoad {
+  value: number,
+  x: number
+} 
 
 export interface iBeam {
   nodes: iNode[],
-  edges: iEdge[],
-  result?: Result
+  edges: iEdge[]
 }
 

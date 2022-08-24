@@ -1,4 +1,4 @@
-import { iBeam } from "../@types/types"
+import { iBeam, iPunctualLoad } from "../@types/types"
 import { Edge } from "./Edges";
 import { Node } from "./Nodes";
 import { create, all, lusolve} from "mathjs";
@@ -26,6 +26,7 @@ export class Beam implements iBeam {
   constructor(
     nodes: Node[],
     load: number,
+    punctualLoads: iPunctualLoad[] = [],
     EI: number = 1,
   ) {
     this.nodes = nodes

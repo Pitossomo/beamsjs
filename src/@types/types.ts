@@ -1,3 +1,5 @@
+import { PunctualLoad } from "../classes/PunctualLoad";
+
 export type Reaction = {
   // vx: number,
   y: number,
@@ -15,7 +17,8 @@ export interface iNode {
 export interface iEdge {
   startNode: iNode,
   endNode: iNode,
-  load: number
+  distributedLoads: iDistributedLoad[],
+  punctualLoads: PunctualLoad[]
   EI: number;
   length: number,
 }

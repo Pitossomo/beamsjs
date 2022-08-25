@@ -4,6 +4,7 @@ import { Node } from "./Nodes";
 import { create, all, lusolve} from "mathjs";
 import { zeros } from "../utils";
 import { PunctualLoad } from "./PunctualLoad";
+import { DistributedLoad } from "./DistributedLoad";
 
 const config: any  = {
   matrix: 'Array',
@@ -26,7 +27,7 @@ export class Beam implements iBeam {
 
   constructor(
     nodes: Node[],
-    distributedLoad: number,
+    distributedLoads: DistributedLoad[],
     punctualLoads: PunctualLoad[] = [],
     EI: number = 1,
   ) {
@@ -36,7 +37,18 @@ export class Beam implements iBeam {
       this.edges.push(new Edge(
         nodes[i],
         nodes[i+1],
-        distributedLoad,
+        distributedLoads.reduce<DistributedLoad[]>((accum, q) => {
+          const DX = q.xf - q.x0
+          if (q.x0 > nodes[i+1].x || q.xf < nodes[i].x || DX === 0) return accum;
+          const DQ = q.endValue - q.startValue
+          const x0 = Math.max(q.x0, nodes[i].x)
+          const xf = Math.min(q.xf, nodes[i+1].x)
+
+          const q0 = q.startValue + (x0-q.x0)*DQ/DX
+          const qf = q.startValue + (xf-q.x0)*DQ/DX
+          const load = new DistributedLoad(q0, qf, x0, xf)
+          return accum.concat(load)
+        }, []),
         punctualLoads.filter(p => (p.x >= nodes[i].x && p.x < nodes[i+1].x)),
         EI
       ))
@@ -50,14 +62,35 @@ export class Beam implements iBeam {
     let forces = new Array(nodes.length).fill(0)
     
     // Stiffness, main forces and main moments computed
-    this.edges.forEach(({load, length, startNode, punctualLoads, endNode, EI}, i) => {
+    this.edges.forEach(({distributedLoads, length, startNode, punctualLoads, endNode, EI}, i) => {
       if (startNode.yFixed && endNode.yFixed) {
-        const vIncrement = load*length/2;
-        const mIncrement = load*(length**2)/12 ;
-        moments[i] += mIncrement;
-        moments[i+1] += -mIncrement;
-        forces[i] += vIncrement;
-        forces[i+1] += vIncrement;
+        distributedLoads.forEach(q => {
+          if (q.endValue === q.startValue && q.x0 === startNode.x && q.xf === endNode.x) {
+            const load = q.startValue
+            const vIncrement = load*length/2;
+            const mIncrement = load*(length**2)/12 ;
+            moments[i] += mIncrement;
+            moments[i+1] += -mIncrement;
+            forces[i] += vIncrement;
+            forces[i+1] += vIncrement;  
+          } else {
+            const a = q.x0 - startNode.x
+            const c = q.xf - q.x0
+            const b = endNode.x - q.xf
+            const p1 = q.endValue - q.startValue
+            const p2 = q.startValue
+
+            moments[i] += p1*c/(540*length**2)*(10*(3*b+c)**2*(3*a+2*c) - 15*c**2*(3*b-length) - 17*c**3)
+            moments[i+1] += -p1*c/(540*length**2)*(10*(3*b+c)*(3*a+2*c)**2 - 15*c**2*(3*a-length) - 28*c**3)
+
+            moments[i] += p2/(12*length**2)*(4*length*((b+c)**3-b**3) - 3*((b+c)**4-b**4))
+            moments[i+1] += -p2/(12*length**2)*(4*length*((a+c)**3-a**3) - 3*((a+c)**4-a**4))
+
+            // TODO - Calculate main forces
+            // forces[i] += ??;
+            // forces[i+1] += ??;  
+          }
+        })
 
         punctualLoads.forEach(p => {
           const a = (p.x-startNode.x)
@@ -78,11 +111,21 @@ export class Beam implements iBeam {
         vStiffness[i][i+1] += 6*EI/(length**2);
         vStiffness[i+1][i+1] += -6*EI/(length**2);
       } else if (startNode.yFixed && !endNode.yFixed) {
-        moments[i] += load*(length**2)/2;
-        forces[i] += load*length;
+        distributedLoads.forEach(q => {
+          if (q.endValue === q.startValue && q.x0 === startNode.x && q.xf === endNode.x) {
+            const load = q.startValue
+            moments[i] += load*(length**2)/2;
+            forces[i] += load*length;  
+          }
+        })
       } else if (!startNode.yFixed && endNode.yFixed) {
-        moments[i+1] += -load*(length**2)/2;
-        forces[i+1] += load*length;
+        distributedLoads.forEach(q => {
+          if (q.endValue === q.startValue && q.x0 === startNode.x && q.xf === endNode.x) {
+            const load = q.startValue
+            moments[i+1] += -load*(length**2)/2;
+            forces[i+1] += load*length;
+          }
+        })
       }
     })
 
@@ -100,8 +143,8 @@ export class Beam implements iBeam {
         return (
           accum 
           + this.reactions[i] 
-          - distLoadLength*edge.load
-          - punctualLoads.reduce<number>((accum2, p) => accum2 + ((p.x <= x) ? p.value : 0), 0)
+          - distributedLoads.reduce<number>((accum, q) => accum + distLoadLength*q.startValue, 0)
+          - punctualLoads.reduce<number>((accum, p) => accum + ((p.x <= x) ? p.value : 0), 0)
         ) 
       }, 0
     )
@@ -114,7 +157,7 @@ export class Beam implements iBeam {
         return (
           accum 
           + this.reactions[i]*(x-edge.startNode.x)
-          - loadLength*edge.load*(x-edge.startNode.x-loadLength/2)
+          - distributedLoads.reduce<number>((accum, q) => accum + loadLength*q.startValue*(x-edge.startNode.x-loadLength/2), 0)
           - punctualLoads.reduce<number>((accum2, p) => accum2 + ((p.x <= x) ? p.value*(x-p.x) : 0), 0)
         )
       }, 0

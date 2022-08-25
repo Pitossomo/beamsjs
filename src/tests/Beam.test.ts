@@ -1,11 +1,12 @@
 import { Beam } from "../classes/Beam"
 import { PunctualLoad } from "../classes/PunctualLoad"
+import { DistributedLoad } from "../classes/DistributedLoad"
 import { Node } from "../classes/Nodes"
 
 describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstatic, with no cantilever ends', () => {
-  const load = 12
+  const load = new DistributedLoad(12)
   const nodes = Node.createFixNodes([0, 3.2, 8])
-  const beam = new Beam(nodes, load)
+  const beam = new Beam(nodes, [load])
 
   it('has correct length property', () => {
     expect(beam.length).toBe(8)
@@ -39,9 +40,9 @@ describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstat
 })
 
 describe('Beam object with 3 gaps, 4 rotation-free y-fixed supports, hyperstatic, with no cantilever ends', () => {
-  const load = 12
+  const load = new DistributedLoad(12)
   const nodes = Node.createFixNodes([0, 4.8, 10.2, 14.4])
-  const beam = new Beam(nodes, load)
+  const beam = new Beam(nodes, [load])
 
   it('has correct length property', () => {
     expect(beam.length).toBe(14.4)
@@ -77,9 +78,9 @@ describe('Beam object with 3 gaps, 4 rotation-free y-fixed supports, hyperstatic
 })
 
 describe('Isostatic beam with single gap', () => {
-  const load = 17
+  const load = new DistributedLoad(17)
   const nodes = Node.createFixNodes([0, 7])
-  const beam = new Beam(nodes, load)
+  const beam = new Beam(nodes, [load])
   const yReaction = 17*7/2
 
   it('solves for correct reactions', () => {
@@ -103,7 +104,7 @@ describe('Isostatic beam with single gap', () => {
 })
 
 describe('Hyperstatic beam with 3 supports and 2 cantilever ends', () => {
-  const load = 17
+  const load = new DistributedLoad(17)
   const nodes = [
     new Node(0, false),
     new Node(2),
@@ -111,7 +112,7 @@ describe('Hyperstatic beam with 3 supports and 2 cantilever ends', () => {
     new Node(5),
     new Node(7, false)
   ]
-  const beam = new Beam(nodes, load)
+  const beam = new Beam(nodes, [load])
 
   it('solves for correct reactions', () => {
     const expectedReactions = [0,87.13, -41.44, 73.31,0]
@@ -145,7 +146,34 @@ describe('Isostatic beam with 7m in length and a punctual load of 5 in x=3m', ()
   const punctualLoad = new PunctualLoad(5, 3)
 
   const nodes = Node.createFixNodes([0,7])
-  const beam = new Beam(nodes, 0, [punctualLoad])
+  const beam = new Beam(nodes, [], [punctualLoad])
+
+  it('solves for correct reactions', () => {
+    const expectedReactions = [2.857, 2.143]
+    expectedReactions.forEach((val, i) => {
+      expect(beam.reactions[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('calculates shear forces correctly', () => {
+    const dx = 0.00000001
+    expect(beam.shearForce(dx)).toBeCloseTo(2.857)
+    expect(beam.shearForce(2)).toBeCloseTo(2.857)
+    expect(beam.shearForce(5)).toBeCloseTo(-2.143)
+    expect(beam.shearForce(7-dx)).toBeCloseTo(-2.143)
+  })
+
+  it('calculates bending moments correctly', () => {
+    expect(beam.bendingMoment(0)).toBeCloseTo(0)
+    expect(beam.bendingMoment(3)).toBeCloseTo(8.57)
+    expect(beam.bendingMoment(7)).toBeCloseTo(0)
+  })
+})
+
+describe('Isostatic beam with trapezoidal load', () => {
+  const distLoad = new DistributedLoad(11,17,3,8)
+  const nodes = Node.createFixNodes([0,10])
+  const beam = new Beam(nodes, [distLoad])
 
   it('solves for correct reactions', () => {
     const expectedReactions = [2.857, 2.143]

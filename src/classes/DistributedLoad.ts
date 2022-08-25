@@ -8,9 +8,9 @@ export class DistributedLoad implements iDistributedLoad {
 
   constructor(
     startValue: number,
-    endValue: number,
-    x0: number,
-    xf: number
+    endValue: number = startValue,
+    x0: number = -Infinity,
+    xf: number = +Infinity
   ) {
     this.startValue = startValue
     this.endValue = endValue

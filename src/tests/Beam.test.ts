@@ -3,6 +3,7 @@ import { PunctualLoad } from "../classes/PunctualLoad"
 import { DistributedLoad } from "../classes/DistributedLoad"
 import { Node } from "../classes/Nodes"
 
+/*
 describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstatic, with no cantilever ends', () => {
   const load = new DistributedLoad(12)
   const nodes = Node.createFixNodes([0, 3.2, 8])
@@ -169,14 +170,22 @@ describe('Isostatic beam with 7m in length and a punctual load of 5 in x=3m', ()
     expect(beam.bendingMoment(7)).toBeCloseTo(0)
   })
 })
+*/
 
 describe('Isostatic beam with trapezoidal load', () => {
   const distLoad = new DistributedLoad(11,17,3,8)
   const nodes = Node.createFixNodes([0,10])
   const beam = new Beam(nodes, [distLoad])
 
+  it('calculates main forces correctly', () => {
+    const expectedMainForces = [28.44, 41.56]
+    expectedMainForces.forEach((val, i) => {
+      expect(beam.forces[i]).toBeCloseTo(val)
+    })
+  })
+
   it('solves for correct reactions', () => {
-    const expectedReactions = [2.857, 2.143]
+    const expectedReactions = [30.25, 39.75]
     expectedReactions.forEach((val, i) => {
       expect(beam.reactions[i]).toBeCloseTo(val)
     })
@@ -184,15 +193,16 @@ describe('Isostatic beam with trapezoidal load', () => {
 
   it('calculates shear forces correctly', () => {
     const dx = 0.00000001
-    expect(beam.shearForce(dx)).toBeCloseTo(2.857)
-    expect(beam.shearForce(2)).toBeCloseTo(2.857)
-    expect(beam.shearForce(5)).toBeCloseTo(-2.143)
-    expect(beam.shearForce(7-dx)).toBeCloseTo(-2.143)
+    expect(beam.shearForce(dx)).toBeCloseTo(30.25)
+    expect(beam.shearForce(2)).toBeCloseTo(30.25)
+    expect(beam.shearForce(4.43)).toBeCloseTo(0)
+    expect(beam.shearForce(9)).toBeCloseTo(-39.75)
+    expect(beam.shearForce(10-dx)).toBeCloseTo(-39.75)
   })
 
   it('calculates bending moments correctly', () => {
     expect(beam.bendingMoment(0)).toBeCloseTo(0)
-    expect(beam.bendingMoment(3)).toBeCloseTo(8.57)
-    expect(beam.bendingMoment(7)).toBeCloseTo(0)
+    expect(beam.bendingMoment(5)).toBeCloseTo(126.59)
+    expect(beam.bendingMoment(10)).toBeCloseTo(0)
   })
 })

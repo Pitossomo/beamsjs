@@ -1,7 +1,7 @@
-import { iBeam, iPunctualLoad } from "../@types/types"
+import { iBeam } from "../@types/types"
 import { Edge } from "./Edges";
 import { Node } from "./Nodes";
-import { create, all, lusolve} from "mathjs";
+import { create, all } from "mathjs";
 import { zeros } from "../utils";
 import { PunctualLoad } from "./PunctualLoad";
 import { DistributedLoad } from "./DistributedLoad";
@@ -41,11 +41,13 @@ export class Beam implements iBeam {
           const DX = q.xf - q.x0
           if (q.x0 > nodes[i+1].x || q.xf < nodes[i].x || DX === 0) return accum;
           const DQ = q.endValue - q.startValue
+          
           const x0 = Math.max(q.x0, nodes[i].x)
           const xf = Math.min(q.xf, nodes[i+1].x)
-
-          const q0 = q.startValue + (x0-q.x0)*DQ/DX
-          const qf = q.startValue + (xf-q.x0)*DQ/DX
+          const m = DQ/DX
+          
+          const q0 = q.startValue + (m ? (x0-q.x0)*m : 0)
+          const qf = q.startValue + (m ? (xf-q.x0)*m : 0)
           const load = new DistributedLoad(q0, qf, x0, xf)
           return accum.concat(load)
         }, []),

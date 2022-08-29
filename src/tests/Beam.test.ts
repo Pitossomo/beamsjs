@@ -22,7 +22,6 @@ describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstat
 
   it('calculates shear forces correctly', () => {
     const dx = 0.0001
-    expect(beam.shearForce(-1)).toBeCloseTo(0)
     expect(beam.shearForce(dx)).toBeCloseTo(10.8)
     expect(beam.shearForce(3.2-dx)).toBeCloseTo(-27.6)
     expect(beam.shearForce(3.2+dx)).toBeCloseTo(34.4)
@@ -175,7 +174,7 @@ describe('Isostatic beam with trapezoidal load', () => {
   const nodes = Node.createFixNodes([0,10])
   const beam = new Beam(nodes, [distLoad])
 
-  it('calculates main forces moments', () => {
+  it('calculates main moments correctly', () => {
     const expectedMainMoments = [69.67, -87.75]
     expectedMainMoments.forEach((val, i) => {
       expect(beam.moments[i]).toBeCloseTo(val)
@@ -200,14 +199,14 @@ describe('Isostatic beam with trapezoidal load', () => {
     const dx = 0.00000001
     expect(beam.shearForce(dx)).toBeCloseTo(30.25)
     expect(beam.shearForce(2)).toBeCloseTo(30.25)
-    expect(beam.shearForce(4.43)).toBeCloseTo(0)
+    expect(beam.shearForce(5.4284)).toBeCloseTo(0)
     expect(beam.shearForce(9)).toBeCloseTo(-39.75)
     expect(beam.shearForce(10-dx)).toBeCloseTo(-39.75)
   })
 
   it('calculates bending moments correctly', () => {
     expect(beam.bendingMoment(0)).toBeCloseTo(0)
-    expect(beam.bendingMoment(5)).toBeCloseTo(126.59)
+    expect(beam.bendingMoment(5)).toBeCloseTo(127.6503)
     expect(beam.bendingMoment(10)).toBeCloseTo(0)
   })
 })

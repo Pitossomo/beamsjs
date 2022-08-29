@@ -27,7 +27,7 @@ export class Beam implements iBeam {
 
   constructor(
     nodes: Node[],
-    distributedLoads: DistributedLoad[],
+    distLoads: DistributedLoad[],
     punctualLoads: PunctualLoad[] = [],
     EI: number = 1,
   ) {
@@ -37,7 +37,7 @@ export class Beam implements iBeam {
       this.edges.push(new Edge(
         nodes[i],
         nodes[i+1],
-        distributedLoads.reduce<DistributedLoad[]>((accum, q) => {
+        distLoads.reduce<DistributedLoad[]>((accum, q) => {
           const DX = q.xf - q.x0
           if (q.x0 > nodes[i+1].x || q.xf < nodes[i].x || DX === 0) return accum;
           const DQ = q.endValue - q.startValue
@@ -153,13 +153,19 @@ export class Beam implements iBeam {
     this.shearForce = x => this.edges.reduce(
       (accum, edge, i) => {
         if (x < edge.startNode.x) return accum;
-        const distLoadLength = Math.min(x,edge.endNode.x) - edge.startNode.x
-
         return (
           accum 
           + this.reactions[i] 
-          - distributedLoads.reduce<number>((accum, q) => accum + distLoadLength*q.startValue, 0)
-          - punctualLoads.reduce<number>((accum, p) => accum + ((p.x <= x) ? p.value : 0), 0)
+          - edge.distributedLoads.reduce<number>((accum, q) => {
+            if (x < q.x0) return 0
+            const c = q.xf-q.x0
+            const dx = Math.min(x-q.x0, c)
+            const m = (q.endValue-q.startValue)/c
+            const vx = q.startValue + m*dx
+            const P: number = (q.startValue + vx)*dx/2
+            return accum + P
+          }, 0)
+          - edge.punctualLoads.reduce<number>((accum, p) => accum + ((p.x <= x) ? p.value : 0), 0)
         ) 
       }, 0
     )
@@ -168,12 +174,21 @@ export class Beam implements iBeam {
       (accum, edge, i) => {
         if (x < edge.startNode.x) return accum;
 
-        const loadLength = Math.min(x,edge.endNode.x) - edge.startNode.x;
         return (
           accum 
           + this.reactions[i]*(x-edge.startNode.x)
-          - distributedLoads.reduce<number>((accum, q) => accum + loadLength*q.startValue*(x-edge.startNode.x-loadLength/2), 0)
-          - punctualLoads.reduce<number>((accum2, p) => accum2 + ((p.x <= x) ? p.value*(x-p.x) : 0), 0)
+          - edge.distributedLoads.reduce<number>((accum, q) => {
+            if (x < q.x0) return 0
+            const c = q.xf-q.x0
+            const dx = Math.min(x-q.x0, c)
+            const m = (q.endValue-q.startValue)/c
+            const vx: number = q.startValue + m*dx
+            const P: number = (q.startValue + vx)*dx/2
+            if (!dx || !P ) return accum
+            const dxc = (2*q.startValue + vx)*(dx**2)/(6*P) + ((x > q.xf) ? x - q.xf : 0)
+            return accum + P*dxc
+          }, 0)
+          - edge.punctualLoads.reduce<number>((accum2, p) => accum2 + ((p.x <= x) ? p.value*(x-p.x) : 0), 0)
         )
       }, 0
     )

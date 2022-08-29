@@ -3,7 +3,6 @@ import { PunctualLoad } from "../classes/PunctualLoad"
 import { DistributedLoad } from "../classes/DistributedLoad"
 import { Node } from "../classes/Nodes"
 
-/*
 describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstatic, with no cantilever ends', () => {
   const load = new DistributedLoad(12)
   const nodes = Node.createFixNodes([0, 3.2, 8])
@@ -170,12 +169,18 @@ describe('Isostatic beam with 7m in length and a punctual load of 5 in x=3m', ()
     expect(beam.bendingMoment(7)).toBeCloseTo(0)
   })
 })
-*/
 
 describe('Isostatic beam with trapezoidal load', () => {
   const distLoad = new DistributedLoad(11,17,3,8)
   const nodes = Node.createFixNodes([0,10])
   const beam = new Beam(nodes, [distLoad])
+
+  it('calculates main forces moments', () => {
+    const expectedMainMoments = [69.67, -87.75]
+    expectedMainMoments.forEach((val, i) => {
+      expect(beam.moments[i]).toBeCloseTo(val)
+    })
+  })
 
   it('calculates main forces correctly', () => {
     const expectedMainForces = [28.44, 41.56]

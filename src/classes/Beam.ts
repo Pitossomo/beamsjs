@@ -82,15 +82,28 @@ export class Beam implements iBeam {
             const p1 = q.endValue - q.startValue
             const p2 = q.startValue
 
-            moments[i] += p1*c/(540*length**2)*(10*(3*b+c)**2*(3*a+2*c) - 15*c**2*(3*b-length) - 17*c**3)
-            moments[i+1] += -p1*c/(540*length**2)*(10*(3*b+c)*(3*a+2*c)**2 - 15*c**2*(3*a-length) - 28*c**3)
+            // M1t = Moment on the 1st support relative to the triangular part of the load
+            // M2t = Moment on the 2nd support relative to the triangular part of the load
+            const M1t= p1*c/(540*length**2)*(10*(3*b+c)**2*(3*a+2*c) - 15*c**2*(3*b-length) - 17*c**3)
+            const M2t = -p1*c/(540*length**2)*(10*(3*b+c)*(3*a+2*c)**2 - 15*c**2*(3*a-length) - 28*c**3)
+            moments[i] += M1t
+            moments[i+1] += M2t
+            
+            // M1r = Moment on the 1st support relative to the rectangular part of the load
+            // M2r = Moment on the 2nd support relative to the rectangular part of the load
+            const M1r = p2/(12*length**2)*(4*length*((b+c)**3-b**3) - 3*((b+c)**4-b**4))
+            const M2r = -p2/(12*length**2)*(4*length*((a+c)**3-a**3) - 3*((a+c)**4-a**4))
+            moments[i] += M1r
+            moments[i+1] += M2r
 
-            moments[i] += p2/(12*length**2)*(4*length*((b+c)**3-b**3) - 3*((b+c)**4-b**4))
-            moments[i+1] += -p2/(12*length**2)*(4*length*((a+c)**3-a**3) - 3*((a+c)**4-a**4))
+            const R2t = (p1*c*(a+2*c/3)/2 - M1t - M2t )/length
+            const R1t = p1*c/2 - R2t 
 
-            // TODO - Calculate main forces
-            // forces[i] += ??;
-            // forces[i+1] += ??;  
+            const R2r = (p2*c*(a+c/2) - M1r - M2r)/length
+            const R1r = p2*c - R2r
+
+            forces[i] += R1t + R1r;
+            forces[i+1] += R2t + R2r;
           }
         })
 

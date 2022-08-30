@@ -130,9 +130,13 @@ export class Beam implements iBeam {
           if (q.endValue === q.startValue && q.x0 === startNode.x && q.xf === endNode.x) {
             const load = q.startValue
             moments[i] += load*(length**2)/2;
-            forces[i] += load*length;  
+            forces[i] += load*length; 
           }
+
+          // TODO: deal with trapezoidal Loads on cantilevers
         })
+        // TODO: deal with punctual loads on cantilevers
+
       } else if (!startNode.yFixed && endNode.yFixed) {
         distributedLoads.forEach(q => {
           if (q.endValue === q.startValue && q.x0 === startNode.x && q.xf === endNode.x) {
@@ -140,7 +144,11 @@ export class Beam implements iBeam {
             moments[i+1] += -load*(length**2)/2;
             forces[i+1] += load*length;
           }
+          
+          // TODO: deal with trapezoidal Loads on cantilevers
         })
+
+        // TODO: deal with punctual loads on cantilevers
       }
     })
 

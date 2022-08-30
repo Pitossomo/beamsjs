@@ -210,3 +210,39 @@ describe('Isostatic beam with trapezoidal load', () => {
     expect(beam.bendingMoment(10)).toBeCloseTo(0)
   })
 })
+
+describe('Hyperstatic beam with trapezoidal load', () => {
+  const distLoad = new DistributedLoad(5,9,2,10)
+  const nodes = Node.createFixNodes([0,3,7,15])
+  const beam = new Beam(nodes, [distLoad])
+
+  it('solves for correct reactions', () => {
+    const expectedReactions = [0.127, 12.826, 40.857, 2.191]
+    expectedReactions.forEach((val, i) => {
+      expect(beam.reactions[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('calculates shear forces correctly', () => {
+    const dx = 0.00000001
+    expect(beam.shearForce(dx)).toBeCloseTo(0.127)
+    expect(beam.shearForce(2)).toBeCloseTo(0.127)
+    expect(beam.shearForce(3-dx)).toBeCloseTo(-5.123)
+    expect(beam.shearForce(3+dx)).toBeCloseTo(7.703)
+    expect(beam.shearForce(7-dx)).toBeCloseTo(-18.297)
+    expect(beam.shearForce(7+dx)).toBeCloseTo(22.559)
+    expect(beam.shearForce(10)).toBeCloseTo(-2.191)
+    expect(beam.shearForce(10-dx)).toBeCloseTo(-2.191)
+  })
+
+  it('calculates bending moments correctly', () => {
+    expect(beam.bendingMoment(0)).toBeCloseTo(0)
+    expect(beam.bendingMoment(2)).toBeCloseTo(0.254)
+    expect(beam.bendingMoment(3)).toBeCloseTo(-2.202)
+    expect(beam.bendingMoment(4.325)).toBeCloseTo(2.982)
+    expect(beam.bendingMoment(7)).toBeCloseTo(-20.725)
+    expect(beam.bendingMoment(9.748)).toBeCloseTo(11.221)
+    expect(beam.bendingMoment(10)).toBeCloseTo(10.953)
+    expect(beam.bendingMoment(15)).toBeCloseTo(0)
+  })
+})

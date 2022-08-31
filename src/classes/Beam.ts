@@ -131,11 +131,18 @@ export class Beam implements iBeam {
             const load = q.startValue
             moments[i] += load*(length**2)/2;
             forces[i] += load*length; 
+          } else if (q.x0 >= startNode.x && q.xf <= endNode.x) {
+            const force = q.partialForce(startNode.x, endNode.x)
+            forces[i] += force
+            moments[i] += force*(q.partialCentroid(startNode.x, endNode.x)-startNode.x)
           }
-
-          // TODO: deal with trapezoidal Loads on cantilevers
         })
-        // TODO: deal with punctual loads on cantilevers
+        punctualLoads.forEach(p => {
+          if (startNode.x <= p.x && p.x < endNode.x) {
+            forces[i] += p.value
+            moments[i] += p.value*(p.x - startNode.x)    
+          }       
+        })
 
       } else if (!startNode.yFixed && endNode.yFixed) {
         distributedLoads.forEach(q => {
@@ -143,12 +150,18 @@ export class Beam implements iBeam {
             const load = q.startValue
             moments[i+1] += -load*(length**2)/2;
             forces[i+1] += load*length;
+          } else if (q.x0 >= startNode.x && q.xf <= endNode.x) {
+            const force = q.partialForce(startNode.x, endNode.x)
+            forces[i+1] += force
+            moments[i+1] += -force*(endNode.x - q.partialCentroid(startNode.x, endNode.x))  
           }
-          
-          // TODO: deal with trapezoidal Loads on cantilevers
         })
-
-        // TODO: deal with punctual loads on cantilevers
+        punctualLoads.forEach(p => {
+          if (startNode.x <= p.x && p.x < endNode.x) {
+            forces[i+1] += p.value
+            moments[i+1] += -p.value*(endNode.x - p.x)    
+          }       
+        })
       }
     })
 

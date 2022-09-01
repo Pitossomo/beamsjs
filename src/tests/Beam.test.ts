@@ -247,14 +247,177 @@ describe('Hyperstatic beam with trapezoidal load', () => {
   })
 })
 
-describe('Hyperstatic beam with trapezoidal load, punctual load and 2 cantilever ends', () => {
+describe('Punctual loads on cantilevers', () => {
+  const nodes = [
+    new Node(0, false),
+    new Node(3, true),
+    new Node(5, true),
+    new Node(7, true),
+    new Node(8, false)
+  ]
+  const punctualLoads = [
+    new PunctualLoad(17, 1),
+    new PunctualLoad(17, 8)
+  ]
+
+  const beam = new Beam(nodes, [], punctualLoads)
+
+  it('result in correct forces',() => {
+    const expectedForces = [0, 17, 0, 17, 0]
+    expectedForces.forEach((val, i) => {
+      expect(beam.forces[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('result in correct reactions',() => {
+    const expectedReactions = [0, 40.375, -38.25, 31.875, 0]
+    expectedReactions.forEach((val, i) => {
+      expect(beam.reactions[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('result in correct shear forces', () => {
+    expect(beam.shearForce(0)).toBeCloseTo(0)
+    expect(beam.shearForce(2)).toBeCloseTo(-17)
+    expect(beam.shearForce(4)).toBeCloseTo(23.375)
+    expect(beam.shearForce(6)).toBeCloseTo(-14.875)
+    expect(beam.shearForce(7)).toBeCloseTo(17)
+  })
+
+  it('result in correct bending moments', () => {
+    expect(beam.bendingMoment(0)).toBeCloseTo(0)
+    expect(beam.bendingMoment(2)).toBeCloseTo(-17)
+    expect(beam.bendingMoment(3)).toBeCloseTo(-34)
+    expect(beam.bendingMoment(5)).toBeCloseTo(12.750)
+    expect(beam.bendingMoment(7)).toBeCloseTo(-17)
+    expect(beam.bendingMoment(8)).toBeCloseTo(0)
+  })
+
+})
+
+describe('Punctual and distributed loads on cantilevers', () => {
+  const nodes = [
+    new Node(0, false),
+    new Node(3, true),
+    new Node(5, true),
+    new Node(7, true),
+    new Node(8, false)
+  ]
+  const distributedLoads = [
+    new DistributedLoad(13,5,1,2),
+    new DistributedLoad(13,5,7,8),
+  ]
+
+  const punctualLoads = [
+    new PunctualLoad(17, 8)
+  ]
+
+
+  const beam = new Beam(nodes, distributedLoads, punctualLoads)
+
+  it('result in correct forces',() => {
+    const expectedForces = [0, 9, 0, 26, 0]
+    expectedForces.forEach((val, i) => {
+      expect(beam.forces[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('result in correct reactions',() => {
+    const expectedReactions = [0, 20.458, -26.250, 40.792, 0]
+    expectedReactions.forEach((val, i) => {
+      expect(beam.reactions[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('result in correct shear forces', () => {
+    const dx = 0.00000001
+    expect(beam.shearForce(0)).toBeCloseTo(0)
+    expect(beam.shearForce(2)).toBeCloseTo(-9)
+    expect(beam.shearForce(4)).toBeCloseTo(11.458)
+    expect(beam.shearForce(6)).toBeCloseTo(-14.792)
+    expect(beam.shearForce(7+dx)).toBeCloseTo(26)
+    expect(beam.shearForce(8-dx)).toBeCloseTo(17)
+  })
+
+  it('result in correct bending moments', () => {
+    expect(beam.bendingMoment(0)).toBeCloseTo(0)
+    expect(beam.bendingMoment(2)).toBeCloseTo(-5.167)
+    expect(beam.bendingMoment(3)).toBeCloseTo(-14.167)
+    expect(beam.bendingMoment(5)).toBeCloseTo(8.750)
+    expect(beam.bendingMoment(7)).toBeCloseTo(-20.833)
+    expect(beam.bendingMoment(8)).toBeCloseTo(0)
+  })
+
+})
+
+describe('Punctual and distributed loads on cantilevers', () => {
+  const nodes = [
+    new Node(0, false),
+    new Node(3, true),
+    new Node(5, true),
+    new Node(7, true),
+    new Node(8, false)
+  ]
+  const distributedLoads = [
+    new DistributedLoad(10,-5,1,4),
+    new DistributedLoad(13,5,7,8),
+  ]
+
+  const punctualLoads = [
+    new PunctualLoad(17, 8)
+  ]
+
+  const beam = new Beam(nodes, distributedLoads, punctualLoads)
+
+  it('result in correct reactions',() => {
+    const expectedReactions = [0, 19.448, -26.812, 40.865, 0]
+    expectedReactions.forEach((val, i) => {
+      expect(beam.reactions[i]).toBeCloseTo(val)
+    })
+  })
+
+  it('result in correct shear forces', () => {
+    const dx = 0.00000001
+    expect(beam.shearForce(0)).toBeCloseTo(0)
+    expect(beam.shearForce(2)).toBeCloseTo(-7.500)
+    expect(beam.shearForce(4)).toBeCloseTo(11.948)
+    expect(beam.shearForce(6)).toBeCloseTo(-14.865)
+    expect(beam.shearForce(7+dx)).toBeCloseTo(26)
+    expect(beam.shearForce(8-dx)).toBeCloseTo(17)
+  })
+
+  it('result in correct bending moments', () => {
+    expect(beam.bendingMoment(0)).toBeCloseTo(0)
+    expect(beam.bendingMoment(2)).toBeCloseTo(-4.167)
+    expect(beam.bendingMoment(3)).toBeCloseTo(-13.333)
+    expect(beam.bendingMoment(5)).toBeCloseTo(8.896)
+    expect(beam.bendingMoment(7)).toBeCloseTo(-20.833)
+    expect(beam.bendingMoment(8)).toBeCloseTo(0)
+  })
+
+})
+
+describe('Isostatic beam with trapezoidal load, punctual load and 2 cantilever ends', () => {
   const distLoad = new DistributedLoad(5,9,2,10)
   const punctualLoad = new PunctualLoad(13,10)
-  const nodes = Node.createFixNodes([3,7])
+  const nodes = [
+    new Node(0, false),
+    new Node(3),
+    new Node(7),
+    new Node(15, false)
+  ]
   const beam = new Beam(nodes, [distLoad], [punctualLoad])
 
+  it('solves for correct forces', () => {
+    const expectedForces = [0, 17.450, 51.550, 0]
+    expectedForces.forEach((val, i) => {
+      expect(beam.forces[i]).toBeCloseTo(val)
+    })
+  })
+
+
   it('solves for correct reactions', () => {
-    const expectedReactions = [-1.083, 70.083]
+    const expectedReactions = [0, -1.083, 70.083, 0]
     expectedReactions.forEach((val, i) => {
       expect(beam.reactions[i]).toBeCloseTo(val)
     })
@@ -268,8 +431,8 @@ describe('Hyperstatic beam with trapezoidal load, punctual load and 2 cantilever
     expect(beam.shearForce(3+dx)).toBeCloseTo(-6.333)
     expect(beam.shearForce(7-dx)).toBeCloseTo(-32.333)
     expect(beam.shearForce(7+dx)).toBeCloseTo(37.750)
-    expect(beam.shearForce(10)).toBeCloseTo(13)
-    expect(beam.shearForce(10-dx)).toBeCloseTo(0)
+    expect(beam.shearForce(10-dx)).toBeCloseTo(13)
+    expect(beam.shearForce(10+dx)).toBeCloseTo(0)
     expect(beam.shearForce(15-dx)).toBeCloseTo(0)
   })
 

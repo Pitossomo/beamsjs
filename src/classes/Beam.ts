@@ -51,7 +51,11 @@ export class Beam implements iBeam {
           const load = new DistributedLoad(q0, qf, x0, xf)
           return accum.concat(load)
         }, []),
-        punctualLoads.filter(p => (p.x >= nodes[i].x && p.x < nodes[i+1].x)),
+        punctualLoads.filter(p => (
+          p.x >= nodes[i].x && (
+            (p.x < nodes[i+1].x) ||
+            (p.x === nodes[i+1].x && !nodes[i+1].yFixed)
+          ))),
         EI
       ))
     }
@@ -125,6 +129,7 @@ export class Beam implements iBeam {
         stiffness[i+1][i+1] += 4*EI/length;
         vStiffness[i][i+1] += 6*EI/(length**2);
         vStiffness[i+1][i+1] += -6*EI/(length**2);
+
       } else if (startNode.yFixed && !endNode.yFixed) {
         distributedLoads.forEach(q => {
           if (q.endValue === q.startValue && q.x0 === startNode.x && q.xf === endNode.x) {
@@ -138,7 +143,7 @@ export class Beam implements iBeam {
           }
         })
         punctualLoads.forEach(p => {
-          if (startNode.x <= p.x && p.x < endNode.x) {
+          if (startNode.x <= p.x && p.x <= endNode.x) {
             forces[i] += p.value
             moments[i] += p.value*(p.x - startNode.x)    
           }       
@@ -182,8 +187,8 @@ export class Beam implements iBeam {
             const c = q.xf-q.x0
             const dx = Math.min(x-q.x0, c)
             const m = (q.endValue-q.startValue)/c
-            const vx = q.startValue + m*dx
-            const P: number = (q.startValue + vx)*dx/2
+            const vx = q.startValue + m*dx || 0
+            const P = (q.startValue + vx)*dx/2
             return accum + P
           }, 0)
           - edge.punctualLoads.reduce<number>((accum, p) => accum + ((p.x <= x) ? p.value : 0), 0)
@@ -203,8 +208,8 @@ export class Beam implements iBeam {
             const c = q.xf-q.x0
             const dx = Math.min(x-q.x0, c)
             const m = (q.endValue-q.startValue)/c
-            const vx: number = q.startValue + m*dx
-            const P: number = (q.startValue + vx)*dx/2
+            const vx = q.startValue + m*dx || 0
+            const P = (q.startValue + vx)*dx/2
             if (!dx || !P ) return accum
             const dxc = (2*q.startValue + vx)*(dx**2)/(6*P) + ((x > q.xf) ? x - q.xf : 0)
             return accum + P*dxc

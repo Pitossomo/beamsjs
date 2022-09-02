@@ -1,4 +1,5 @@
 # BeamsJS
+Current version 0.1.4
 
 ## Running
 - For testing in a command-line environment:
@@ -10,7 +11,11 @@
 ![TestStatus](./src/tests/img/testStatus.png)
 
 ## Version history
-### Version 0.1.x
+
+#### 0.1.4
+- 🥇 Hyperstatic beams with cantilevers-ends, punctual loads and trapezoidal loads working all working united 
+- 🚀 Features ready to publish!
+- **TODO:** Add documentation and user interface
 
 #### 0.1.3
 - Aug 24th, 2022

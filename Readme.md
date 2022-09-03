@@ -1,5 +1,4 @@
 # BeamsJS
-V 1.0.0
 
 BeamsJS let us create isostatic and hyperstatic continuous beams with vertical-fixed supports, and access the resulting reactions, shear force and bending moments.
 

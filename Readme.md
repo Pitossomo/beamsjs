@@ -3,23 +3,42 @@ V 1.0.0
 
 BeamsJS let us create isostatic and hyperstatic continuous beams with vertical-fixed supports, and access the resulting reactions, shear force and bending moments.
 
-## Usage Exemple
+## Setting up
+### Instalation
+  `npm install beamsjs`
 
+### Importing and using
+  ```ts
+    // One line for importing
+    import { Beam, Node, DistributedLoad } from beamsjs
+    
+    // One-line for creating the beam
+    const beam = new Beam(createFixNodes(0,2,4), [new DistributedLoad(12)])
+
+    // Once created, the properties are easily accessible
+    beam.reactions            // Access the beam reactions
+    beam.shearForce(1.999)    // Returns the shear force on x = 1.999
+    beam.bendingMoment(0.75)  // Returns the value 3.375
+  ```
+
+---
+
+## Usage Exemple
 ### A simple, hyperstatic beam  
-- The following beam:<br>
+- The example above can be graphically represented by the following image:<br>
 ![Beam0-2-4](./img/beam0-2-4.png)
 
-- can be created as follows:
+- It was created as follows:
   ```ts
     const beam = new Beam(
-      createFixNodes(0,2,4),
+      Node.createFixNodes(0,2,4),
       [new DistributedLoad(12)]
     )
   ```
 
 - Once the beam instance is created, their properties can be accessed by the inner properties and methods of the object:
   ```ts
-    beam.reactions          // Returns the array [9, 15, -9]
+    beam.reactions          // Returns the array [9, 30, -9]
     beam.shearForce(1.999)  // Returns the value -14.988 (almost -15)
     beam.shearForce(2.001)  // Returns the value 14.988 (almost 15) 
   ```
@@ -28,7 +47,7 @@ BeamsJS let us create isostatic and hyperstatic continuous beams with vertical-f
   ```ts
     beam.bendingMoment(0.75)  // Returns the value 3.375
     beam.bendingMoment(2)  // Returns the value -6.000
-    beam.(4)               // Returns the value 0  
+    beam.beandingMoment(4)               // Returns the value 0  
   ```
   ![bendingMoment0-2-4](./img/bendingMoment0-2-4.png)
 
@@ -95,10 +114,13 @@ BeamsJS let us create isostatic and hyperstatic continuous beams with vertical-f
 
 ## Version history
 
+#### 1.0.1
+- 📄 Readme and documentation updated
+- **TODO:** Format, prettify and optimize the code
+
 #### 1.0.0
 - Configurations for publishing done
 - Documentation and examples in this readme file
-- **TODO:** Format, prettify and optimize the code
 
 #### 0.1.4
 - 🥇 Hyperstatic beams with overhang ends, punctual loads and trapezoidal loads working all working united 

@@ -1,11 +1,16 @@
 {
   "name": "beamsjs",
   "version": "1.0.0",
-  "description": "a lib for calculating bending moments and shear force in hyperstatic beams",
-  "main": "index.js",
+  "description": "A lib for calculating bending moments and shear force in hyperstatic beams",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pitossomo/beamsJS.git"
   },
   "keywords": [
     "bending",
@@ -18,7 +23,7 @@
     "analysis"
   ],
   "author": "Pitossomo",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/jest": "^28.1.6",
     "@types/mathjs": "^9.4.2",

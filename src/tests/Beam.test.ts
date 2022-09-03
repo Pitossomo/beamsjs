@@ -1,7 +1,7 @@
 import { Beam } from "../classes/Beam"
 import { PunctualLoad } from "../classes/PunctualLoad"
 import { DistributedLoad } from "../classes/DistributedLoad"
-import { Node } from "../classes/Nodes"
+import { Node } from "../classes/Node"
 
 describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstatic, with no cantilever ends', () => {
   const load = new DistributedLoad(12)

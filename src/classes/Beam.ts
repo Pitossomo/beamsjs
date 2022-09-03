@@ -1,6 +1,6 @@
 import { iBeam } from "../@types/types"
-import { Edge } from "./Edges";
-import { Node } from "./Nodes";
+import { Edge } from "./Edge";
+import { Node } from "./Node";
 import { create, all } from "mathjs";
 import { zeros } from "../utils";
 import { PunctualLoad } from "./PunctualLoad";

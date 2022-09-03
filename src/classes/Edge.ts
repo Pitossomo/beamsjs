@@ -1,6 +1,6 @@
 import { iEdge } from "../@types/types"
 import { DistributedLoad } from "./DistributedLoad"
-import { Node } from "./Nodes"
+import { Node } from "./Node"
 import { PunctualLoad } from "./PunctualLoad"
 
 export class Edge implements iEdge {

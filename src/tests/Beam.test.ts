@@ -244,7 +244,7 @@ describe('Hyperstatic beam with trapezoidal load', () => {
   })
 })
 
-describe('Punctual loads on cantilevers', () => {
+describe('Punctual loads on overhang-ended beam', () => {
   const nodes = [
     new Node(0, false),
     new Node(3, true),
@@ -292,7 +292,7 @@ describe('Punctual loads on cantilevers', () => {
 
 })
 
-describe('Punctual and distributed loads on cantilevers', () => {
+describe('Punctual and distributed loads on overhang-ended beam', () => {
   const nodes = [
     new Node(0, false),
     new Node(3, true),
@@ -347,7 +347,7 @@ describe('Punctual and distributed loads on cantilevers', () => {
 
 })
 
-describe('Punctual and distributed loads on cantilevers', () => {
+describe('Punctual and distributed loads on overhang-ended beam', () => {
   const nodes = [
     new Node(0, false),
     new Node(3, true),
@@ -394,15 +394,44 @@ describe('Punctual and distributed loads on cantilevers', () => {
 
 })
 
-describe('Isostatic beam with trapezoidal load, punctual load and 2 cantilever ends', () => {
+describe('Isostatic beam with trapezoidal load, punctual load and both overhang ends', () => {
+  /* Create a distributed trapezoidal load passing as parameters:
+      - the start value of the load
+      - the end value value of the load
+      - the start x-coordinate of the load
+      - the end x-coordinate of the load
+    Optionally, we can just past a single value, in case of a uniform load acting on all the beam
+  */
   const distLoad = new DistributedLoad(5,9,2,10)
+  
+  /* For punctual loads, we pass as atributes:
+    - the value of the punctual load,
+    - the x-coordinate of the punctual load
+  */
   const punctualLoad = new PunctualLoad(13,10)
+
+  /* Create the nodes with their support status, with the parameters as following:
+      - the x-coordinate of the node,
+      - the y-direction situation of the of the node, ie. true if it is fixed, false if it is a cantilever end
+    Important to note that only the first and last nodes of the beam can be not fixed.
+    For cantilever beams, we still have to create the first and last nodes and give them false as the second parameter where they are free
+    Optionally, we can create fixed nodes passing only the first parameter
+    On beams without cantilever ends, we can use the static method:
+      - const nodes = Node.createFixNodes([0, 3, 7, 15])
+  */
   const nodes = [
     new Node(0, false),
-    new Node(3),
-    new Node(7),
+    new Node(3, true),
+    new Node(7, true),
     new Node(15, false)
   ]
+
+  /* Finally, we can create the beam, passing as parameters:
+    - an array with the nodes created above,
+    - an array with all the distributed loads created above
+    - an optional array with all punctual loads created above,
+    - the optional value of the constant EI, the product of inertia moment and Young's modulus
+  */
   const beam = new Beam(nodes, [distLoad], [punctualLoad])
 
   it('solves for correct forces', () => {

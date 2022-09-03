@@ -35,7 +35,7 @@ BeamsJS let us create isostatic and hyperstatic continuous beams with vertical-f
     )
   ```
 
-- Once the beam instance is created, their properties can be accessed by the inner properties and methods of the object:
+- Once the beam instance is created, the properties can be accessed by the  properties and methods of the object:
   ```ts
     beam.reactions          // Returns the array [9, 30, -9]
     beam.shearForce(1.999)  // Returns the value -14.988 (almost -15)
@@ -53,7 +53,7 @@ BeamsJS let us create isostatic and hyperstatic continuous beams with vertical-f
 ---
 
 ### A more complex example
-- A more complex beam with non-uniform distributed load a punctual loads and overhang ends:
+- Lets build a more complex beam with a non-uniform distributed load, a punctual load and overhang ends:
   ```ts
     /* Create a distributed trapezoidal load passing as parameters:
         - the start value of the load
@@ -113,7 +113,7 @@ BeamsJS let us create isostatic and hyperstatic continuous beams with vertical-f
 
 ## Version history
 
-#### 1.0.1
+#### 1.0.1 and 1.0.2
 - 📄 Readme and documentation updated
 - **TODO:** Format, prettify and optimize the code
 

@@ -187,7 +187,7 @@ describe('Hyperstatic beam with 2 loads on the same edge', () => {
     expect(beam.bendingMoment(0)).toBeCloseTo(0)
     expect(beam.bendingMoment(0.37)).toBeCloseTo(0.352)
     expect(beam.bendingMoment(1)).toBeCloseTo(-0.625)
-    expect(beam.bendingMoment(1.5-dx)).toBeCloseTo(-0.31)
+    expect(beam.bendingMoment(1.5-dx)).toBeCloseTo(0.312)
     expect(beam.bendingMoment(1.63)).toBeCloseTo(0.352)
     expect(beam.bendingMoment(2)).toBeCloseTo(0)
   })

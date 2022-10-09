@@ -174,46 +174,28 @@ export class Beam implements iBeam {
     this.stiffness = stiffness;
     this.displacements = math.lusolve(stiffness, moments).map(e => -e[0]);
     this.reactions = math.add(math.multiply(vStiffness,this.displacements), forces)
- 
+    
     this.shearForce = x => this.edges.reduce(
       (accum, edge, i) => {
         if (x < edge.startNode.x) return accum;
-        return (
-          accum 
-          + this.reactions[i] 
-          - edge.distributedLoads.reduce<number>((accum, q) => {
-            if (x < q.x0) return 0
-            const c = q.xf-q.x0
-            const dx = Math.min(x-q.x0, c)
-            const m = (q.endValue-q.startValue)/c
-            const vx = q.startValue + m*dx || 0
-            const P = (q.startValue + vx)*dx/2
-            return accum + P
-          }, 0)
-          - edge.punctualLoads.reduce<number>((accum, p) => accum + ((p.x <= x) ? p.value : 0), 0)
-        ) 
+        return accum + 
+          this.reactions[i] 
+          - edge.distributedLoads.reduce<number>((accum2, q) => accum2 + q.partialForce(q.x0, x), 0)
+          - edge.punctualLoads.reduce<number>((accum3, p) => accum3 + ((p.x <= x) ? p.value : 0), 0)
       }, 0
     )
  
     this.bendingMoment = x => this.edges.reduce(
       (accum, edge, i) => {
-        if (x < edge.startNode.x) return accum;
+        if (x <= edge.startNode.x) return accum;
 
         return (
           accum 
           + this.reactions[i]*(x-edge.startNode.x)
-          - edge.distributedLoads.reduce<number>((accum, q) => {
-            if (x < q.x0) return 0
-            const c = q.xf-q.x0
-            const dx = Math.min(x-q.x0, c)
-            const m = (q.endValue-q.startValue)/c
-            const vx = q.startValue + m*dx || 0
-            const P = (q.startValue + vx)*dx/2
-            if (!dx || !P ) return accum
-            const dxc = (2*q.startValue + vx)*(dx**2)/(6*P) + ((x > q.xf) ? x - q.xf : 0)
-            return accum + P*dxc
-          }, 0)
-          - edge.punctualLoads.reduce<number>((accum2, p) => accum2 + ((p.x <= x) ? p.value*(x-p.x) : 0), 0)
+          - edge.distributedLoads.reduce<number>((accum2, q) => (
+              accum2 + q.partialForce(q.x0, x)*(x-q.partialCentroid(q.x0, x))
+            ), 0)
+          - edge.punctualLoads.reduce<number>((accum3, p) => accum3 + ((p.x <= x) ? p.value*(x-p.x) : 0), 0)
         )
       }, 0
     )

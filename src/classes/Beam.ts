@@ -39,7 +39,7 @@ export class Beam implements iBeam {
         nodes[i+1],
         distLoads.reduce<DistributedLoad[]>((accum, q) => {
           const DX = q.xf - q.x0
-          if (q.x0 > nodes[i+1].x || q.xf < nodes[i].x || DX === 0) return accum;
+          if (q.x0 >= nodes[i+1].x || q.xf <= nodes[i].x || DX === 0) return accum;
           const DQ = q.endValue - q.startValue
           
           const x0 = Math.max(q.x0, nodes[i].x)
@@ -59,7 +59,6 @@ export class Beam implements iBeam {
         EI
       ))
     }
-    
     this.length = nodes[nodes.length-1].x
 
     let stiffness = zeros([nodes.length, nodes.length])

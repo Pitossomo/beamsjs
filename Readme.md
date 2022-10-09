@@ -113,7 +113,7 @@ BeamsJS let us create isostatic and hyperstatic continuous beams with vertical-f
 
 ## Version history
 
-#### 1.0.2
+#### 1.0.2 and 1.0.3
   - 📄 Fixed problem with multiple overlapping distributed loads
 - **TODO:** Format, prettify and optimize the code
 

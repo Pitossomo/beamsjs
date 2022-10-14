@@ -1,6 +1,6 @@
 {
   "name": "beamsjs",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A lib for calculating bending moments and shear force in hyperstatic beams",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

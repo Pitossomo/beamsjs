@@ -10,8 +10,14 @@ export class Edge implements iEdge {
   punctualLoads: PunctualLoad[]
   length: number
   EI: number
-
-  constructor(startNode: Node, endNode: Node, distributedLoads: DistributedLoad[], punctualLoads: PunctualLoad[], EI: number) {
+  
+  constructor(
+    startNode: Node,
+    endNode: Node,
+    distributedLoads: DistributedLoad[],
+    punctualLoads: PunctualLoad[],
+    EI: number,
+  ) {
     this.startNode = startNode
     this.endNode = endNode
     this.distributedLoads = distributedLoads

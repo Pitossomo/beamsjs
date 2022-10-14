@@ -1,12 +1,11 @@
 import { iNode } from "../@types/types";
+import { createFixNodes } from "../utils";
 
 export class Node implements iNode {
   x: number;
   yFixed: boolean;
 
-  static createFixNodes(coords: number[]): Node[] {
-    return coords.map(x => new Node(x, true))
-  } 
+  static createFixNodes = createFixNodes
 
   constructor(x: number, yFixed: boolean = true) {
     this.x = x,

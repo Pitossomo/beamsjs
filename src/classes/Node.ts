@@ -5,7 +5,7 @@ export class Node implements iNode {
   x: number;
   yFixed: boolean;
 
-  static createFixNodes = createFixNodes
+  static createFixNodes = (coords: number[]) => createFixNodes(coords)
 
   constructor(x: number, yFixed: boolean = true) {
     this.x = x,

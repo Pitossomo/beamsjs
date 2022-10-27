@@ -17,6 +17,8 @@ export class Beam implements iBeam {
   edges: Edge[];
   length: number;
 
+  breakPoints: number[];
+
   stiffness: number[][];
   moments: number[];
   forces: number[];
@@ -31,13 +33,16 @@ export class Beam implements iBeam {
     punctualLoads: PunctualLoad[] = [],
     EI: number = 1,
   ) {
+    this.breakPoints = [nodes[0].x]
     this.nodes = nodes
     this.edges = []
-    for (let i = 0; i<nodes.length-1; i++) {
+    for (let i = 0; i < nodes.length-1; i++) {
+      this.breakPoints.push(nodes[i+1].x)
       this.edges.push(new Edge(
         nodes[i],
         nodes[i+1],
         distLoads.reduce<DistributedLoad[]>((accum, q) => {
+          this.breakPoints.push(q.x0, q.xf)
           const DX = q.xf - q.x0
           if (q.x0 >= nodes[i+1].x || q.xf <= nodes[i].x || DX === 0) return accum;
           const DQ = q.endValue - q.startValue
@@ -51,15 +56,20 @@ export class Beam implements iBeam {
           const load = new DistributedLoad(q0, qf, x0, xf)
           return accum.concat(load)
         }, []),
-        punctualLoads.filter(p => (
-          p.x >= nodes[i].x && (
-            (p.x < nodes[i+1].x) ||
-            (p.x === nodes[i+1].x && !nodes[i+1].yFixed)
-          ))),
+        punctualLoads.filter(p => {
+          this.breakPoints.push(p.x)
+          return (
+            p.x >= nodes[i].x && (
+              (p.x < nodes[i+1].x) ||
+              (p.x === nodes[i+1].x && !nodes[i+1].yFixed)
+          )
+        )}),
         EI
       ))
     }
     this.length = nodes[nodes.length-1].x
+
+    this.breakPoints = this.breakPoints.sort((a,b) => a - b).filter((point, j, arr) => !j || point != arr[j-1])
 
     let stiffness = zeros([nodes.length, nodes.length])
     let vStiffness = zeros([nodes.length, nodes.length])

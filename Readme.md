@@ -113,6 +113,10 @@ BeamsJS let us create isostatic and hyperstatic continuous beams with vertical-f
 
 ## Version history
 
+#### 1.0.7
+  - 📄 Breakpoints added 
+- **TODO:** Add verifications to steel area calculus, add steel area and section details to Edge class
+
 #### 1.0.6
   - 📄 Bug fix in Node.createFixNodes() 
 - **TODO:** Add verifications to steel area calculus, add steel area and section details to Edge class

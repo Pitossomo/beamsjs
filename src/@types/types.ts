@@ -6,6 +6,11 @@ export type Reaction = {
   // M: number
 }
 
+export interface iLocalizedValue {
+  x: number,
+  value: number
+}
+
 export interface iNode {
   x: number,
   // y: number,
@@ -39,4 +44,3 @@ export interface iBeam {
   nodes: iNode[],
   edges: iEdge[]
 }
-

@@ -5,6 +5,7 @@ import { create, all } from "mathjs";
 import { zeros } from "../utils";
 import { PunctualLoad } from "./PunctualLoad";
 import { DistributedLoad } from "./DistributedLoad";
+import { LocalizedValue } from "./LocalizedValue";
 
 const config: any  = {
   matrix: 'Array',
@@ -26,8 +27,8 @@ export class Beam implements iBeam {
   reactions: any;
   shearForce: (x: number, x0?: number, previousShearForce?: number) => number;
   bendingMoment: (x: number, x0?: number, previousBendingMoment?: number) => number;
-  shearForceArray: (numberOfSections: number) => number[];
-  bendingMomentArray: (numberOfSections: number) => number[];
+  shearForceArray: (numberOfSections: number) => LocalizedValue[];
+  bendingMomentArray: (numberOfSections: number) => LocalizedValue[];
 
   constructor(
     nodes: Node[],
@@ -35,16 +36,16 @@ export class Beam implements iBeam {
     punctualLoads: PunctualLoad[] = [],
     EI: number = 1,
   ) {
-    this.breakPoints = [nodes[0].x]
+    this.breakPoints = []
+    if (nodes[0].yFixed) this.breakPoints.push(nodes[0].x)
     this.nodes = nodes
     this.edges = []
     for (let i = 0; i < nodes.length-1; i++) {
-      this.breakPoints.push(nodes[i+1].x)
+      if (nodes[i+1].yFixed) this.breakPoints.push(nodes[i+1].x)
       this.edges.push(new Edge(
         nodes[i],
         nodes[i+1],
         distLoads.reduce<DistributedLoad[]>((accum, q) => {
-          this.breakPoints.push(q.x0, q.xf)
           const DX = q.xf - q.x0
           if (q.x0 >= nodes[i+1].x || q.xf <= nodes[i].x || DX === 0) return accum;
           const DQ = q.endValue - q.startValue
@@ -187,18 +188,21 @@ export class Beam implements iBeam {
     this.displacements = math.lusolve(stiffness, moments).map(e => -e[0]);
     this.reactions = math.add(math.multiply(vStiffness,this.displacements), forces)
     
-    this.shearForce = (x, x0 = 0, prevShearForce = 0) => this.edges.reduce(
-      (accum, edge, i) => {
-        if (edge.endNode.x < x0 || x < edge.startNode.x) return accum;
-        return (
-          accum
-          + prevShearForce
-          + (x0 <= edge.startNode.x ? this.reactions[i] : 0)
-          - edge.distributedLoads.reduce<number>((accum2, q) => accum2 + q.partialForce(Math.max(q.x0,x0), x), 0)
-          - edge.punctualLoads.reduce<number>((accum3, p) => accum3 + ((x0 <= p.x && p.x <= x ) ? p.value : 0), 0)
-        )
-      }, 0
-    )
+    this.shearForce = (x, x0 = 0, prevShearForce = 0) => {
+      if (x === 0) return prevShearForce
+      const shearForceVariation = this.edges.reduce(
+        (accum, edge, i) => {
+          if (edge.endNode.x <= x0 || x < edge.startNode.x) return accum;
+          return (
+            accum
+            + (x0 <= edge.startNode.x ? this.reactions[i] : 0)
+            - edge.distributedLoads.reduce<number>((accum2, q) => accum2 + q.partialForce(Math.max(q.x0,x0), x), 0)
+            - edge.punctualLoads.reduce<number>((accum3, p) => accum3 + ((x0 <= p.x && p.x <= x ) ? p.value : 0), 0)
+          )
+        }, 0
+      )
+      return prevShearForce + shearForceVariation
+    }
     
     this.bendingMoment = x => this.edges.reduce(
       (accum, edge, i) => {
@@ -216,10 +220,53 @@ export class Beam implements iBeam {
     )
 
     this.shearForceArray = numOfSections => {
-      let newShearForceArray = new Array(numOfSections).fill(0)
-      // TODO
-      console.log(newShearForceArray)      
-      return newShearForceArray
+      let shearForceArray = []
+      const dx = this.length/numOfSections
+
+      if (this.breakPoints.includes(0)) {
+        shearForceArray.push({
+          x: Number.MIN_VALUE,
+          value: this.shearForce(Number.MIN_VALUE)
+        })
+      } 
+      else shearForceArray.push({
+        x: 0,
+        value: this.shearForce(0)
+      })
+
+      for (let i = 1; i < numOfSections-1; i++) {
+        if (this.breakPoints.includes(i*dx)) {
+          shearForceArray.push({
+            x: i*dx - Number.MIN_VALUE,
+            value: this.shearForce(i*dx - Number.MIN_VALUE)
+          })
+
+          shearForceArray.push({
+            x: i*dx + Number.MIN_VALUE,
+            value: this.shearForce(i*dx + Number.MIN_VALUE)
+          })
+        } else {
+          shearForceArray.push({
+            x: i*dx,
+            value: this.shearForce(i*dx)
+          })          
+        }
+      }
+
+      if (this.breakPoints.includes(this.length)) {
+        shearForceArray.push({
+          x: this.length - Number.MIN_VALUE,
+          value: this.shearForce(this.length - Number.MIN_VALUE )
+        })
+      } else {
+        shearForceArray.push({
+          x: this.length,
+          value: this.shearForce(this.length)
+        })
+      }
+          
+      console.log(shearForceArray)      
+      return shearForceArray
     }
 
     this.bendingMomentArray = numOfSections => {

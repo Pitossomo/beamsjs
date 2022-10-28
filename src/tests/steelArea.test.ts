@@ -14,7 +14,13 @@ describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstat
   const beam = new Beam(nodes, distributedLoads, punctualLoads)
 
   it('has correct breakpoints', () => {
-    console.log(beam.breakPoints)
     expect(beam.breakPoints).toEqual([0, 2, 3.2, 3.5, 7, 8, 9, 11])
+  })
+
+  it('has correct shearForceArrays', () => {
+    const shearForceArray = beam.shearForceArray(1000)
+    shearForceArray.forEach((value, index) => {
+      expect(value).toBeCloseTo(beam.shearForce(beam.length/1000*index))
+    })
   })
 })

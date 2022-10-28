@@ -24,8 +24,10 @@ export class Beam implements iBeam {
   forces: number[];
   displacements: any;
   reactions: any;
-  shearForce: (x: number) => number;
-  bendingMoment: (x: number) => number;
+  shearForce: (x: number, x0?: number, previousShearForce?: number) => number;
+  bendingMoment: (x: number, x0?: number, previousBendingMoment?: number) => number;
+  shearForceArray: (numberOfSections: number) => number[];
+  bendingMomentArray: (numberOfSections: number) => number[];
 
   constructor(
     nodes: Node[],
@@ -185,16 +187,19 @@ export class Beam implements iBeam {
     this.displacements = math.lusolve(stiffness, moments).map(e => -e[0]);
     this.reactions = math.add(math.multiply(vStiffness,this.displacements), forces)
     
-    this.shearForce = x => this.edges.reduce(
+    this.shearForce = (x, x0 = 0, prevShearForce = 0) => this.edges.reduce(
       (accum, edge, i) => {
-        if (x < edge.startNode.x) return accum;
-        return accum + 
-          this.reactions[i] 
-          - edge.distributedLoads.reduce<number>((accum2, q) => accum2 + q.partialForce(q.x0, x), 0)
-          - edge.punctualLoads.reduce<number>((accum3, p) => accum3 + ((p.x <= x) ? p.value : 0), 0)
+        if (edge.endNode.x < x0 || x < edge.startNode.x) return accum;
+        return (
+          accum
+          + prevShearForce
+          + (x0 <= edge.startNode.x ? this.reactions[i] : 0)
+          - edge.distributedLoads.reduce<number>((accum2, q) => accum2 + q.partialForce(Math.max(q.x0,x0), x), 0)
+          - edge.punctualLoads.reduce<number>((accum3, p) => accum3 + ((x0 <= p.x && p.x <= x ) ? p.value : 0), 0)
+        )
       }, 0
     )
- 
+    
     this.bendingMoment = x => this.edges.reduce(
       (accum, edge, i) => {
         if (x <= edge.startNode.x) return accum;
@@ -209,5 +214,17 @@ export class Beam implements iBeam {
         )
       }, 0
     )
+
+    this.shearForceArray = numOfSections => {
+      let newShearForceArray = new Array(numOfSections).fill(0)
+      // TODO
+      console.log(newShearForceArray)      
+      return newShearForceArray
+    }
+
+    this.bendingMomentArray = numOfSections => {
+      // TODO
+      return new Array(numOfSections)
+    }
   }
 }

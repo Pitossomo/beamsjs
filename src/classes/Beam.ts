@@ -256,7 +256,7 @@ export class Beam implements iBeam {
       if (this.breakPoints.includes(this.length)) {
         shearForceArray.push({
           x: this.length - Number.MIN_VALUE,
-          value: this.shearForce(this.length - Number.MIN_VALUE )
+          value: this.shearForce(this.length - Number.MIN_VALUE)
         })
       } else {
         shearForceArray.push({
@@ -265,13 +265,21 @@ export class Beam implements iBeam {
         })
       }
           
-      console.log(shearForceArray)      
       return shearForceArray
     }
 
     this.bendingMomentArray = numOfSections => {
-      // TODO
-      return new Array(numOfSections)
+      let bendingMomentArray = []
+      const dx = this.length/numOfSections
+
+      for (let i = 0; i <= numOfSections; i++) {
+        bendingMomentArray.push({
+          x: i*dx,
+          value: this.bendingMoment(i*dx)
+        })
+      }
+
+      return bendingMomentArray
     }
   }
 }

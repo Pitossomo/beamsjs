@@ -32,4 +32,6 @@ describe('Beam object with two gaps, 3 rotation-free y-fixed supports, hyperstat
       expect(value).toBeCloseTo(beam.bendingMoment(x))
     })
   })
+
+  
 })

@@ -27,6 +27,13 @@ export class Beam implements iBeam {
   reactions: any;
   shearForce: (x: number, x0?: number, previousShearForce?: number) => number;
   bendingMoment: (x: number, x0?: number, previousBendingMoment?: number) => number;
+  neutralLine: (
+    x: number,
+    b: number,
+    d: number,
+    securityFactor: number,
+    fcd: number
+  ) => number;
   shearForceArray: (numberOfSections: number) => LocalizedValue[];
   bendingMomentArray: (numberOfSections: number) => LocalizedValue[];
 
@@ -281,5 +288,9 @@ export class Beam implements iBeam {
 
       return bendingMomentArray
     }
+
+    this.neutralLine = (x, b, d, securityFactor, fcd) => (
+      (0.68*d - Math.sqrt(0.4624*d**2 - 1.088*this.bendingMoment(x)*securityFactor/b/fcd))/0.544
+    )
   }
 }
